@@ -37,7 +37,8 @@ public class FileController {
 //        var user = (UserDetailsImpl) authentication.getPrincipal();
 
         log.debug("[FileController] Request to services for saving user with name {} and the file {}", name, file);
-        long fileId = fileService.save(name, directoryId, user.getId());
+//        long fileId = fileService.save(name, directoryId, user.getId());
+        long fileId = fileService.save(name, directoryId);
         UUID uuid = fileService.find(fileId);
         minioService.save(uuid, file);
 

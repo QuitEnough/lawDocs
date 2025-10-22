@@ -21,10 +21,28 @@ public class FileServiceImpl implements FileService {
 
     private final MinioService minioService;
 
-    @Override
-    public Long save(String name, Long directoryId, Long userId) {
+//    @Override
+//    public Long save(String name, Long directoryId, Long userId) {
+//
+//        log.debug("[FileService] saving the file with name {}, directoryId {}, userId {}", name, directoryId, userId);
+//
+//        UUID uuid = UUID.randomUUID();
+//
+//        File file = File.builder()
+//                .name(name)
+//                .uuid(uuid)
+//                .directoryId(directoryId)
+//                .userId(userId)
+//                .build();
+//
+//        fileRepository.save(file);
+//        return file.getId();
+//    }
 
-        log.debug("[FileService] saving the file with name {}, directoryId {}, userId {}", name, directoryId, userId);
+    @Override
+    public Long save(String name, Long directoryId) {
+
+        log.debug("[FileService] saving the file with name {}, directoryId {}", name, directoryId);
 
         UUID uuid = UUID.randomUUID();
 
@@ -32,7 +50,6 @@ public class FileServiceImpl implements FileService {
                 .name(name)
                 .uuid(uuid)
                 .directoryId(directoryId)
-                .userId(userId)
                 .build();
 
         fileRepository.save(file);
