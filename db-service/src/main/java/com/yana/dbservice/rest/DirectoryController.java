@@ -1,4 +1,4 @@
-package com.yana.dbservice.controller;
+package com.yana.dbservice.rest;
 
 import com.yana.dbservice.dto.Node;
 import com.yana.dbservice.service.StructureService;

@@ -6,8 +6,8 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,14 +17,19 @@ import java.io.InputStream;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class MinioServiceImpl implements MinioService {
 
-    @Value("${spring.minio.bucket}")
     private final String bucket;
 
     private final MinioClient minioClient;
+
+    @Autowired
+    public MinioServiceImpl(MinioClient minioClient,
+                            @Value("${spring.minio.bucket}") String bucket) {
+        this.minioClient = minioClient;
+        this.bucket = bucket;
+    }
 
     @Override
     public boolean save(UUID uuid, MultipartFile multipartFile) {

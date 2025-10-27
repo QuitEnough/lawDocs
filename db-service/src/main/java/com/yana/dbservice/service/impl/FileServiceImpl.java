@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,7 +25,7 @@ public class FileServiceImpl implements FileService {
 //    @Override
 //    public Long save(String name, Long directoryId, Long userId) {
 //
-//        log.debug("[FileService] saving the file with name {}, directoryId {}, userId {}", name, directoryId, userId);
+//        log.info("[FileService] saving the file with name {}, directoryId {}, userId {}", name, directoryId, userId);
 //
 //        UUID uuid = UUID.randomUUID();
 //
@@ -42,7 +43,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public Long save(String name, Long directoryId) {
 
-        log.debug("[FileService] saving the file with name {}, directoryId {}", name, directoryId);
+        log.info("[FileService] saving the file with name {}, directoryId {}", name, directoryId);
 
         UUID uuid = UUID.randomUUID();
 
@@ -77,6 +78,7 @@ public class FileServiceImpl implements FileService {
         log.debug("[FileService] downloading the file with the id {}", fileId);
 
         File file = fileRepository.findById(fileId).get();
+        //Optional<File> file = fileRepository.findById(fileId);
         return minioService.find(file.getUuid());
     }
 

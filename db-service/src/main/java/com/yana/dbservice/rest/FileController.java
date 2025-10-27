@@ -1,4 +1,4 @@
-package com.yana.dbservice.controller;
+package com.yana.dbservice.rest;
 
 import com.yana.dbservice.exception.FileActionException;
 import com.yana.dbservice.service.FileService;
@@ -6,9 +6,7 @@ import com.yana.dbservice.service.MinioService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
