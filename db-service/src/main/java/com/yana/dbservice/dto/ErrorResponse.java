@@ -6,4 +6,4 @@ import lombok.Builder;
 public record ErrorResponse(
         int statusCode,
         String message
-) {}
+) { }

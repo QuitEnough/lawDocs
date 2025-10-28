@@ -13,4 +13,4 @@ public record NodeDir(
         @JsonIgnore Long parentId,
         @JsonIgnore List<NodeDir> childrenDirs,
         @JsonIgnore List<NodeFile> files
-) {}
+) { }

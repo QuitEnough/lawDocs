@@ -65,7 +65,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public UUID find(Long fileId) {
         Optional<File> file = fileRepository.findById(fileId);
-        if (fileRepository.findById(fileId).isPresent()) {
+        if (file.isPresent()) {
             return file.get().getUuid();
         } else {
             throw new FileActionException("The file is not present");

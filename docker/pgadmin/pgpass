@@ -1,1 +1,0 @@
-db:5432:${NAME_DB}:${USER_DB}:${PASSWORD_DB}

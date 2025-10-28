@@ -9,4 +9,4 @@ public record NodeFile(
         Long id,
         String name,
         @JsonIgnore Long parentId
-) {}
+) { }
