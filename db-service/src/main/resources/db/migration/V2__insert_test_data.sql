@@ -1,17 +1,12 @@
--- Вставка тестового пользователя
-INSERT INTO users (id, email, password, role)
-VALUES (1, 'test@test.com', 'password', 'USER');
+INSERT INTO users (email, password, role) VALUES
+('EmailWithStrongPassword@mail.ru', '$2a$10$X/7Olfqi2AFqeYnPvnmO9uUXPyI0bMPkvIKoGBbRcX5pF4RJxCrau', 'USER'), -- PashkaM8
+('DimaBilan@yandex.ru', '$2a$10$mec7gSVnJrVaSR6BpE9k1.MjdgG3ZJIw0yIqLxdh09PfVJ65cTA7a', 'USER'), -- Bilan1
+('Bruno@Mars.com', '$2a$10$W1CEPiWhbq..WzomGOba.OuQ.AA7BoT0m3HVg7MQ0W1XneUVP/IDe', 'ADMIN'); -- BruBest1
 
--- Вставка директорий
-INSERT INTO directories (id, name, user_id, parent_id)
-VALUES
-(1, 'Root Directory', 1, NULL),
-(2, 'Documents', 1, 1),
-(3, 'Images', 1, 1);
-
--- Вставка файлов (исправленные UUID)
-INSERT INTO files (id, name, uuid, directory_id, user_id)
-VALUES
-(1, 'readme.pdf', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid, 2, 1),
-(2, 'photo.jpg', 'b1ffcc99-9c0b-4ef8-bb6d-6bb9bd380a12'::uuid, 3, 1),
-(3, 'document.txt', 'c2eecc99-9c0b-4ef8-bb6d-6bb9bd380a13'::uuid, 1, 1);
+INSERT INTO directories (name, user_id, parent_id) VALUES
+('dir1', 1, null),
+('dir2', 1, null),
+('dir3', 1, 1),
+('dir4', 1, 3),
+('dir5', 1, 4),
+('dir6', 1, 4);

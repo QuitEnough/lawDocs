@@ -26,7 +26,7 @@ public class DirectoryController {
     @GetMapping("/user")
     public Node getAllDataForUser(@RequestParam("id") Long userId) {
         log.debug("[Response] with directories and files data for the user with id {}", userId);
-        return structureService.getEnvelopeDirsForUser(userId);
+        return structureService.getDirsForUser(userId);
     }
 
 }
