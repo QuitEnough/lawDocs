@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequestMapping("/files")
 @AllArgsConstructor
 @Slf4j
-public class FileController {
+public class FileRestController {
 
     private final FileService fileService;
 
@@ -34,19 +34,19 @@ public class FileController {
 //        var authentication = SecurityContextHolder.getContext().getAuthentication();
 //        var user = (UserDetailsImpl) authentication.getPrincipal();
 
-        log.debug("[FileController] Request to services for saving user with name {} and the file {}", name, file);
+        log.info("[FileController] Request to services for saving user with name {} and the file {}", name, file);
 //        long fileId = fileService.save(name, directoryId, user.getId());
         long fileId = fileService.save(name, directoryId);
         UUID uuid = fileService.find(fileId);
         minioService.save(uuid, file);
 
-        log.debug("[Response] with saved data");
+        log.info("[Response] with saved data");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/find")
     public void findFile(@RequestParam Long fileId, HttpServletResponse response) {
-        log.debug("[RequestParams] finding the file with id {}", fileId);
+        log.info("[RequestParams] finding the file with id {}", fileId);
         try (InputStream stream = fileService.download(fileId)) {
             response.setHeader("Content-Disposition", "attachment");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -58,7 +58,7 @@ public class FileController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId) {
-        log.debug("[RequestParams] deleting the file with id {}", fileId);
+        log.info("[RequestParams] deleting the file with id {}", fileId);
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
         return new ResponseEntity<>(HttpStatus.OK);

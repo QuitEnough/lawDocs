@@ -1,11 +1,11 @@
 package com.yana.dbservice.service.impl;
 
 import com.yana.dbservice.entity.File;
+import com.yana.dbservice.exception.FileActionException;
 import com.yana.dbservice.repository.FileRepository;
 import com.yana.dbservice.service.FileService;
 import com.yana.dbservice.service.MinioService;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class FileServiceImpl implements FileService {
 
     private final FileRepository fileRepository;
@@ -42,9 +41,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Long save(String name, Long directoryId) {
-
-        log.info("[FileService] saving the file with name {}, directoryId {}", name, directoryId);
-
         UUID uuid = UUID.randomUUID();
 
         File file = File.builder()
@@ -59,38 +55,40 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void delete(Long fileId) {
-        log.debug("[FileService] deleting the file with id {}", fileId);
-        fileRepository.deleteById(fileId);
+        if (fileRepository.findById(fileId).isPresent()) {
+            fileRepository.deleteById(fileId);
+        } else {
+            throw new FileActionException("The file is not present");
+        }
     }
 
     @Override
     public UUID find(Long fileId) {
-
-        log.debug("[FileService] finding the file with id {}", fileId);
-
-        File file = fileRepository.findById(fileId).get();
-        return file.getUuid();
+        Optional<File> file = fileRepository.findById(fileId);
+        if (fileRepository.findById(fileId).isPresent()) {
+            return file.get().getUuid();
+        } else {
+            throw new FileActionException("The file is not present");
+        }
     }
 
     @Override
     public InputStream download(Long fileId) {
-
-        log.debug("[FileService] downloading the file with the id {}", fileId);
-
-        File file = fileRepository.findById(fileId).get();
-        //Optional<File> file = fileRepository.findById(fileId);
-        return minioService.find(file.getUuid());
+        Optional<File> file = fileRepository.findById(fileId);
+        if (file.isPresent()) {
+            return minioService.find(file.get().getUuid());
+        } else {
+            throw new FileActionException("The file is not present");
+        }
     }
 
     @Override
     public List<File> findAllFilesByUserId(Long userId) {
-        log.debug("[FileService] finding files for user with id {}", userId);
         return fileRepository.findFilesByUserId(userId);
     }
 
     @Override
     public List<File> findAllFilesInCertainDir(Long directoryId) {
-        log.debug("[FileService] finding files for user in directory with id {}", directoryId);
         return fileRepository.findFilesByDirectoryId(directoryId);
     }
 

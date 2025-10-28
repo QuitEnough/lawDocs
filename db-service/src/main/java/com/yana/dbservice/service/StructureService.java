@@ -54,9 +54,8 @@ public class StructureService {
         return Node.generateNode(nodeDirList, nodeFileList);
     }
 
-    public Node getDirsForUser(Long userId) {
-        log.debug("Building directory tree for user {}", userId);
-
+    //TODO: будет работать, если убрать аннотацию JsonIgnore или сделать dto response. Подумать, для чего этот метод
+    public Node getRootDirsWithFilesForUser(Long userId) {
         List<NodeDir> all = directoryService.findDirectoryByUserId(userId)
                 .stream()
                 .map(e -> NodeDir.builder()
@@ -75,28 +74,25 @@ public class StructureService {
 
         // Сначала создаем map всех директорий
         for (NodeDir dir : all) {
-            dirMap.put(dir.getId(), dir);
+            dirMap.put(dir.id(), dir);
         }
 
         // Затем строим иерархию
         for (NodeDir dir : all) {
-            if (dir.getParentId() == null) {
+            if (dir.parentId() == null) {
                 rootList.add(dir);
             } else {
-                NodeDir parent = dirMap.get(dir.getParentId());
-                if (parent != null && parent.getChildrenDirs() != null) {
-                    parent.getChildrenDirs().add(dir);
+                NodeDir parent = dirMap.get(dir.parentId());
+                if (parent != null && parent.childrenDirs() != null) {
+                    parent.childrenDirs().add(dir);
                 }
             }
         }
 
-        log.debug("Found {} root directories for user {}", rootList.size(), userId);
         return process(userId, rootList);
     }
 
     public Node process(Long userId, List<NodeDir> nodeDirs) {
-        log.debug("Processing files for {} root directories", nodeDirs.size());
-
         List<NodeFile> topFiles = new ArrayList<>();
 
         // Получаем все файлы пользователя
@@ -131,111 +127,18 @@ public class StructureService {
             processedDirs++;
 
             // Добавляем файлы для текущей директории
-            List<NodeFile> dirFiles = filesByDirectory.get(currentDir.getId());
+            List<NodeFile> dirFiles = filesByDirectory.get(currentDir.id());
             if (dirFiles != null) {
-                currentDir.getFiles().addAll(dirFiles);
+                currentDir.files().addAll(dirFiles);
             }
 
             // Добавляем поддиректории в очередь
-            if (currentDir.getChildrenDirs() != null && !currentDir.getChildrenDirs().isEmpty()) {
-                queue.addAll(currentDir.getChildrenDirs());
+            if (currentDir.childrenDirs() != null && !currentDir.childrenDirs().isEmpty()) {
+                queue.addAll(currentDir.childrenDirs());
             }
         }
 
-        log.debug("Processed {} directories", processedDirs);
         return Node.generateNode(nodeDirs, topFiles);
     }
-
-    /*public Node getEnvelopeDirsForUser(Long userId) {
-        List<NodeDir> rootList = new ArrayList<>();
-        List<NodeDir> toRemove = new ArrayList<>();
-
-        List<NodeDir> all = directoryService.findDirectoryByUserId(userId)
-                .stream()
-                .map(e -> NodeDir.builder()
-                        .type("dir")
-                        .id(e.getId())
-                        .name(e.getName())
-                        .parentId(e.getParentId())
-                        .childrenDirs(new ArrayList<>())
-                        .files(new ArrayList<>())
-                        .build())
-                .collect(Collectors.toList());
-
-        for (NodeDir dir : all) {
-            if (dir.getParentId() == null) {
-                rootList.add(dir);
-                toRemove.add(dir);
-            }
-        }
-
-        all.removeAll(toRemove);
-        toRemove.clear();
-
-        List<NodeDir> current = new LinkedList<>(rootList);
-        List<NodeDir> next = new LinkedList<>();
-        Iterator<NodeDir> iterator = current.iterator();
-
-        while (!all.isEmpty()) {
-            while (iterator.hasNext()) {
-                NodeDir curr = iterator.next();
-                for (NodeDir unknown : all) {
-                    if (curr.getId().equals(unknown.getParentId())) {
-                        curr.getChildrenDirs().add(unknown);
-
-                        next.add(unknown);
-                        toRemove.add(unknown);
-                    }
-                }
-                all.removeAll(toRemove);
-                toRemove.clear();
-            }
-            current = next;
-        }
-
-        return process(userId, rootList);
-    }*/
-
-    /*public Node process(Long userId, List<NodeDir> nodeDirs) {
-        List<NodeFile> topFiles = new ArrayList<>();
-        Node node = Node.generateNode(nodeDirs, topFiles);
-
-        List<File> files = new ArrayList<>(fileService.findAllFilesByUserId(userId));
-        List<File> toRemove = new ArrayList<>();
-
-        Queue<NodeDir> queue = new LinkedList<>(nodeDirs);
-
-        for (File file : files) {
-            if (file.getDirectoryId() == null) {
-                topFiles.add(NodeFile.builder()
-                                .type("file")
-                                .id(file.getId())
-                                .name(file.getName())
-                                .build());
-                toRemove.add(file);
-            }
-        }
-
-        files.removeAll(toRemove);
-        toRemove.clear();
-
-        NodeDir nodeDir;
-        while ((nodeDir = queue.poll()) != null) {
-
-            for (File file : files) {
-                if (nodeDir.getId().equals(nodeDir.getParentId())) {
-                    nodeDir.getFiles().add(NodeFile.builder()
-                                    .type("file")
-                                    .id(file.getId())
-                                    .name(file.getName())
-                                    .build());
-
-                    queue.addAll(nodeDir.getChildrenDirs());
-                }
-            }
-        }
-
-        return node;
-    }*/
 
 }

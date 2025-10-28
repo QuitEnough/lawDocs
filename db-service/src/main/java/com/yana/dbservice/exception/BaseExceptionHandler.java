@@ -18,7 +18,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
     }
 
     @ExceptionHandler({Throwable.class})
@@ -26,7 +26,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
     }
 
 }
