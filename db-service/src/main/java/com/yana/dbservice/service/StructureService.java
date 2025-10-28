@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -53,7 +54,99 @@ public class StructureService {
         return Node.generateNode(nodeDirList, nodeFileList);
     }
 
-    public Node getEnvelopeDirsForUser(Long userId) {
+    public Node getDirsForUser(Long userId) {
+        log.debug("Building directory tree for user {}", userId);
+
+        List<NodeDir> all = directoryService.findDirectoryByUserId(userId)
+                .stream()
+                .map(e -> NodeDir.builder()
+                        .type("dir")
+                        .id(e.getId())
+                        .name(e.getName())
+                        .parentId(e.getParentId())
+                        .childrenDirs(new ArrayList<>())
+                        .files(new ArrayList<>())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Строим дерево используя Map для быстрого доступа
+        Map<Long, NodeDir> dirMap = new HashMap<>();
+        List<NodeDir> rootList = new ArrayList<>();
+
+        // Сначала создаем map всех директорий
+        for (NodeDir dir : all) {
+            dirMap.put(dir.getId(), dir);
+        }
+
+        // Затем строим иерархию
+        for (NodeDir dir : all) {
+            if (dir.getParentId() == null) {
+                rootList.add(dir);
+            } else {
+                NodeDir parent = dirMap.get(dir.getParentId());
+                if (parent != null && parent.getChildrenDirs() != null) {
+                    parent.getChildrenDirs().add(dir);
+                }
+            }
+        }
+
+        log.debug("Found {} root directories for user {}", rootList.size(), userId);
+        return process(userId, rootList);
+    }
+
+    public Node process(Long userId, List<NodeDir> nodeDirs) {
+        log.debug("Processing files for {} root directories", nodeDirs.size());
+
+        List<NodeFile> topFiles = new ArrayList<>();
+
+        // Получаем все файлы пользователя
+        List<File> allFiles = fileService.findAllFilesByUserId(userId);
+        log.debug("Found {} files for user {}", allFiles.size(), userId);
+
+        // Создаем map для быстрого доступа к файлам по directoryId
+        Map<Long, List<NodeFile>> filesByDirectory = new HashMap<>();
+
+        for (File file : allFiles) {
+            NodeFile nodeFile = NodeFile.builder()
+                    .type("file")
+                    .id(file.getId())
+                    .name(file.getName())
+                    .parentId(file.getDirectoryId())
+                    .build();
+
+            Long directoryId = file.getDirectoryId();
+            if (directoryId == null) {
+                topFiles.add(nodeFile);
+            } else {
+                filesByDirectory.computeIfAbsent(directoryId, k -> new ArrayList<>()).add(nodeFile);
+            }
+        }
+
+        // Распределяем файлы по директориям используя BFS
+        Queue<NodeDir> queue = new LinkedList<>(nodeDirs);
+        int processedDirs = 0;
+
+        while (!queue.isEmpty()) {
+            NodeDir currentDir = queue.poll();
+            processedDirs++;
+
+            // Добавляем файлы для текущей директории
+            List<NodeFile> dirFiles = filesByDirectory.get(currentDir.getId());
+            if (dirFiles != null) {
+                currentDir.getFiles().addAll(dirFiles);
+            }
+
+            // Добавляем поддиректории в очередь
+            if (currentDir.getChildrenDirs() != null && !currentDir.getChildrenDirs().isEmpty()) {
+                queue.addAll(currentDir.getChildrenDirs());
+            }
+        }
+
+        log.debug("Processed {} directories", processedDirs);
+        return Node.generateNode(nodeDirs, topFiles);
+    }
+
+    /*public Node getEnvelopeDirsForUser(Long userId) {
         List<NodeDir> rootList = new ArrayList<>();
         List<NodeDir> toRemove = new ArrayList<>();
 
@@ -67,7 +160,7 @@ public class StructureService {
                         .childrenDirs(new ArrayList<>())
                         .files(new ArrayList<>())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
 
         for (NodeDir dir : all) {
             if (dir.getParentId() == null) {
@@ -101,103 +194,9 @@ public class StructureService {
         }
 
         return process(userId, rootList);
-    }
+    }*/
 
-//    public Node getEnvelopeDirsForUser(Long userId) {
-//        List<NodeDir> rootList = new ArrayList<>();
-//        List<NodeDir> toRemove = new ArrayList<>();
-//
-//        // Создаем изменяемую копию списка
-//        List<NodeDir> all = new ArrayList<>(directoryService.findDirectoryByUserId(userId)
-//                .stream()
-//                .map(e -> NodeDir.builder()
-//                        .type("dir")
-//                        .id(e.getId())
-//                        .name(e.getName())
-//                        .parentId(e.getParentId())
-//                        .childrenDirs(new ArrayList<>())
-//                        .files(new ArrayList<>())
-//                        .build())
-//                .toList());
-//
-//        // Находим корневые директории (без parent_id)
-//        for (NodeDir dir : all) {
-//            if (dir.getParentId() == null) {
-//                rootList.add(dir);
-//                toRemove.add(dir);
-//            }
-//        }
-//
-//        // Удаляем корневые из основного списка
-//        all.removeAll(toRemove);
-//        toRemove.clear();
-//
-//        // Строим дерево
-//        List<NodeDir> current = new LinkedList<>(rootList);
-//        List<NodeDir> next = new LinkedList<>();
-//
-//        while (!all.isEmpty()) {
-//            Iterator<NodeDir> iterator = current.iterator();
-//            while (iterator.hasNext()) {
-//                NodeDir curr = iterator.next();
-//                Iterator<NodeDir> allIterator = all.iterator();
-//                while (allIterator.hasNext()) {
-//                    NodeDir unknown = allIterator.next();
-//                    if (curr.getId().equals(unknown.getParentId())) {
-//                        curr.getChildrenDirs().add(unknown);
-//                        next.add(unknown);
-//                        allIterator.remove(); // Безопасное удаление через итератор
-//                    }
-//                }
-//            }
-//            current = next;
-//            next = new LinkedList<>();
-//        }
-//
-//        return process(userId, rootList);
-//    }
-//
-//    public Node process(Long userId, List<NodeDir> nodeDirs) {
-//        List<NodeFile> topFiles = new ArrayList<>();
-//        Node node = Node.generateNode(nodeDirs, topFiles);
-//
-//        List<File> files = new ArrayList<>(fileService.findAllFilesByUserId(userId));
-//
-//        // Файлы без директории (в корне)
-//        for (File file : files) {
-//            if (file.getDirectoryId() == null) {
-//                topFiles.add(NodeFile.builder()
-//                        .type("file")
-//                        .id(file.getId())
-//                        .name(file.getName())
-//                        .build());
-//            }
-//        }
-//
-//        // Файлы в директориях
-//        Queue<NodeDir> queue = new LinkedList<>(nodeDirs);
-//        while (!queue.isEmpty()) {
-//            NodeDir nodeDir = queue.poll();
-//
-//            // Добавляем файлы текущей директории
-//            for (File file : files) {
-//                if (file.getDirectoryId() != null && file.getDirectoryId().equals(nodeDir.getId())) {
-//                    nodeDir.getFiles().add(NodeFile.builder()
-//                            .type("file")
-//                            .id(file.getId())
-//                            .name(file.getName())
-//                            .build());
-//                }
-//            }
-//
-//            // Добавляем поддиректории в очередь
-//            queue.addAll(nodeDir.getChildrenDirs());
-//        }
-//
-//        return node;
-//    }
-
-    public Node process(Long userId, List<NodeDir> nodeDirs) {
+    /*public Node process(Long userId, List<NodeDir> nodeDirs) {
         List<NodeFile> topFiles = new ArrayList<>();
         Node node = Node.generateNode(nodeDirs, topFiles);
 
@@ -237,6 +236,6 @@ public class StructureService {
         }
 
         return node;
-    }
+    }*/
 
 }
