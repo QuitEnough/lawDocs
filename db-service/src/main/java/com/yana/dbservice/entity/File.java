@@ -22,8 +22,9 @@ public class File {
 
     private UUID uuid;
 
-    @Column(name = "DIRECTORY_ID")
-    private Long directoryId;
+    @ManyToOne
+    @JoinColumn(name = "DIRECTORY")
+    private Directory directory;
 
     @Column(name = "USER_ID")
     private Long userId;

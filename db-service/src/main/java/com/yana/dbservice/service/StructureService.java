@@ -1,10 +1,12 @@
 package com.yana.dbservice.service;
 
+import com.google.common.collect.ImmutableCollection;
 import com.yana.dbservice.dto.Node;
 import com.yana.dbservice.dto.NodeDir;
 import com.yana.dbservice.dto.NodeFile;
 import com.yana.dbservice.entity.Directory;
 import com.yana.dbservice.entity.File;
+import com.yana.dbservice.repository.FileRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,16 +23,20 @@ public class StructureService {
 
     private final DirectoryService directoryService;
 
+    private final FileRepository fileRepository;
+
     public Node getDataForCertainDir(Long directoryId) {
+
+        var directory = Directory.builder().id(directoryId).build();
 
         List<Directory> dirs = directoryService.findAllDirectoriesInCertainDir(directoryId);
         List<NodeDir> nodeDirList = new ArrayList<>();
 
-        for (Directory directory : dirs) {
+        for (Directory dir : dirs) {
             NodeDir nodeDir = NodeDir.builder()
                     .type("dir")
-                    .id(directory.getId())
-                    .name(directory.getName())
+                    .id(dir.getId())
+                    .name(dir.getName())
                     .build();
             nodeDirList.add(nodeDir);
         }
@@ -38,11 +44,7 @@ public class StructureService {
         List<File> files = fileService.findAllFilesInCertainDir(directoryId);
         List<NodeFile> nodeFileList = new ArrayList<>();
 
-        List<File> certainFiles = files.stream()
-                .filter(file -> file.getDirectoryId().equals(directoryId))
-                .toList();
-
-        for (File file : certainFiles) {
+        for (File file : files) {
             NodeFile nodeFile = NodeFile.builder()
                     .type("file")
                     .id(file.getId())
@@ -96,7 +98,7 @@ public class StructureService {
         List<NodeFile> topFiles = new ArrayList<>();
 
         // Получаем все файлы пользователя
-        List<File> allFiles = fileService.findAllFilesByUserId(userId);
+        List<File> allFiles = fileRepository.findFilesWithDirectoryByUserId(userId);
         log.debug("Found {} files for user {}", allFiles.size(), userId);
 
         // Создаем map для быстрого доступа к файлам по directoryId
@@ -107,10 +109,10 @@ public class StructureService {
                     .type("file")
                     .id(file.getId())
                     .name(file.getName())
-                    .parentId(file.getDirectoryId())
+                    .parentId(file.getDirectory().getId())
                     .build();
 
-            Long directoryId = file.getDirectoryId();
+            Long directoryId = file.getDirectory().getId();
             if (directoryId == null) {
                 topFiles.add(nodeFile);
             } else {

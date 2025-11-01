@@ -10,4 +10,6 @@ public interface DirectoryService {
 
     List<Directory> findAllDirectoriesInCertainDir(Long directoryId);
 
+    void deleteDirectory(Long directoryId);
+
 }

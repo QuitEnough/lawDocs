@@ -1,7 +1,10 @@
 package com.yana.dbservice.service.impl;
 
+import com.yana.dbservice.entity.Directory;
 import com.yana.dbservice.entity.File;
 import com.yana.dbservice.exception.FileActionException;
+import com.yana.dbservice.exception.DirectoryNotFoundException;
+import com.yana.dbservice.repository.DirectoryRepository;
 import com.yana.dbservice.repository.FileRepository;
 import com.yana.dbservice.service.FileService;
 import com.yana.dbservice.service.MinioService;
@@ -18,6 +21,8 @@ import java.util.UUID;
 public class FileServiceImpl implements FileService {
 
     private final FileRepository fileRepository;
+
+    private final DirectoryRepository directoryRepository;
 
     private final MinioService minioService;
 
@@ -43,10 +48,13 @@ public class FileServiceImpl implements FileService {
     public Long save(String name, Long directoryId) {
         UUID uuid = UUID.randomUUID();
 
+        Directory directory = directoryRepository.findById(directoryId)
+                .orElseThrow(() -> new DirectoryNotFoundException("Directory not found"));
+
         File file = File.builder()
                 .name(name)
                 .uuid(uuid)
-                .directoryId(directoryId)
+                .directory(directory)
                 .build();
 
         fileRepository.save(file);

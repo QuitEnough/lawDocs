@@ -6,22 +6,23 @@ CREATE TABLE IF NOT EXISTS users
     email    VARCHAR(200) UNIQUE   NOT NULL,
     password VARCHAR(200)          NOT NULL,
     role     VARCHAR(200)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS directories
 (
     id    BIGSERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(200)          NOT NULL,
-    user_id BIGINT REFERENCES users(id),
-    parent_id BIGINT REFERENCES directories(id),
-    UNIQUE (id, user_id, parent_id)
-    );
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    parent_id BIGINT REFERENCES directories(id) ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS files
 (
     id BIGSERIAL PRIMARY KEY NOT NULL,
-    name VARCHAR(200) NOT NULL UNIQUE,
+    name VARCHAR(200) NOT NULL,
     uuid  UUID DEFAULT uuid_generate_v4() NOT NULL,
-    directory_id BIGINT REFERENCES directories(id),
-    user_id BIGINT REFERENCES users(id)
-    );
+    directory BIGINT REFERENCES directories(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE (name, directory)
+--     UNIQUE (name, directory, user_id)
+);

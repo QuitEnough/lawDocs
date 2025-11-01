@@ -3,6 +3,9 @@ package com.yana.dbservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "directories")
 @Getter
@@ -23,5 +26,9 @@ public class Directory {
 
     @Column(name = "PARENT_ID")
     private Long parentId;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "directory", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
 
 }

@@ -24,4 +24,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directoryRepository.findDirectoriesByParentId(directoryId);
     }
 
+    @Override
+    public void deleteDirectory(Long directoryId) {
+        directoryRepository.deleteById(directoryId);
+    }
 }

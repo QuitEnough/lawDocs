@@ -1,13 +1,13 @@
 package com.yana.dbservice.rest;
 
 import com.yana.dbservice.dto.Node;
+import com.yana.dbservice.service.DirectoryService;
 import com.yana.dbservice.service.StructureService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/directories")
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DirectoryRestController {
 
+    private final DirectoryService directoryService;
     private final StructureService structureService;
 
     @GetMapping
@@ -27,6 +28,13 @@ public class DirectoryRestController {
     public Node getAllDataForUser(@RequestParam("id") Long userId) {
         log.info("[Response] with directories and files data for the user with id {}", userId);
         return structureService.getRootDirsWithFilesForUser(userId);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteDirectory(@RequestParam("id") Long directoryId) {
+        log.info("[RequestParams] deleting the directory with id {}", directoryId);
+        directoryService.deleteDirectory(directoryId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
