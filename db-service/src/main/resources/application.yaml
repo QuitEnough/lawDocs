@@ -1,0 +1,38 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: "jdbc:postgresql://${HOST_DB}:${PORT_DB}/${NAME_DB}"
+    username: ${USER_DB}
+    password: ${PASSWORD_DB}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  application:
+    name: DB-SERVICE
+
+  minio:
+    url: ${MINIO_URL}
+    bucket: ${MINIO_BUCKET_NAME}
+    access-key: ${MINIO_ACCESS_KEY}
+    secret-key: ${MINIO_SECRET_KEY}
+    port: ${MINIO_PORT}
+
+logging:
+  level:
+    org.springframework:
+      web: DEBUG
+      org.flywaydb: DEBUG
+      org.springframework.boot.autoconfigure.flyway: DEBUG
+      org.springframework.jdbc.core: DEBUG
