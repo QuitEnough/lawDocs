@@ -1,10 +1,10 @@
 services:
 
-  db-service:
-    container_name: db-service
+  file-storage-service:
+    container_name: file-storage-service
     build:
       context: .
-      dockerfile: db-service/Dockerfile
+      dockerfile: file-storage-service/Dockerfile
     restart: no
     ports:
       - 8082:8082
