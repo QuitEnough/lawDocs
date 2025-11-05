@@ -21,4 +21,6 @@ public interface FileService {
 
     List<File> findAllFilesInCertainDir(Long directoryId);
 
+    boolean isFileOwner(Long fileId, Long userId);
+
 }

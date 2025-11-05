@@ -1,5 +1,25 @@
 services:
 
+  user-service:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    restart: no
+    ports:
+      - "8084:8084"
+    environment:
+      HOST_DB: db
+      PORT_DB: 5432
+      NAME_DB: ${NAME_DB}
+      USER_DB: ${USER_DB}
+      PASSWORD_DB: ${PASSWORD_DB}
+      TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   file-storage-service:
     container_name: file-storage-service
     build:
@@ -7,7 +27,7 @@ services:
       dockerfile: file-storage-service/Dockerfile
     restart: no
     ports:
-      - 8082:8082
+      - "8082:8082"
     environment:
       HOST_DB: db
       PORT_DB: 5432
@@ -23,13 +43,17 @@ services:
       MINIO_URL: ${MINIO_URL}
       MINIO_PORT: ${MINIO_PORT}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
   postgres:
     image: postgres:16-alpine
     container_name: postgres
     restart: always
     ports:
-      - 8888:5432
+      - "8888:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -40,7 +64,8 @@ services:
       test: [ "CMD-SHELL", "pg_isready -U ${USER_DB} -d ${NAME_DB}" ]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
 
   minio:
     image: minio/minio:latest

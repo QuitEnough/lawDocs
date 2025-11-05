@@ -66,4 +66,10 @@ public class FileRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/files/{fileId}/owner/{userId}")
+    public Boolean isFileOwner(@PathVariable Long fileId, @PathVariable Long userId) {
+        // Логика проверки владельца файла
+        return fileService.isFileOwner(fileId, userId);
+    }
+
 }

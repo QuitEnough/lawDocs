@@ -1,0 +1,21 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://${HOST_DB}:${PORT_DB}/${NAME_DB}
+    username: ${USER_DB}
+    password: ${PASSWORD_DB}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+token:
+  signing:
+    key: ${TOKEN_SIGNING_KEY}

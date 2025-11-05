@@ -100,4 +100,10 @@ public class FileServiceImpl implements FileService {
         return fileRepository.findFilesByDirectoryId(directoryId);
     }
 
+    @Override
+    public boolean isFileOwner(Long fileId, Long userId) {
+        Optional<File> file = fileRepository.findById(fileId);
+        return file.isPresent() && file.get().getUserId().equals(userId);
+    }
+
 }
