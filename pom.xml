@@ -18,7 +18,7 @@
     <description>lawDocs</description>
 
     <modules>
-        <module>db-service</module>
+        <module>file-storage-service</module>
     </modules>
 
     <properties>
