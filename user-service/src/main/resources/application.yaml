@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: USER-SERVICE
   datasource:
     url: jdbc:postgresql://${HOST_DB}:${PORT_DB}/${NAME_DB}
     username: ${USER_DB}
@@ -16,6 +16,16 @@ spring:
       hibernate:
         format_sql: true
 
+file-storage:
+  url: ${FILE_STORAGE_URL:http://localhost:8082}
+
 token:
   signing:
     key: ${TOKEN_SIGNING_KEY}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000

@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query(value = """
-            SELECT f 
+            SELECT COUNT(f) > 0 
             FROM File f 
             WHERE f.id = :fileId 
             AND f.userId = :userId

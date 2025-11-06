@@ -2,10 +2,7 @@ package com.yana.userservice.rest;
 
 import com.yana.userservice.service.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,6 +24,11 @@ public class UserRestController {
         }
 
         return List.of();
+    }
+
+    @GetMapping("/{userId}/files/{fileId}/owner")
+    public Boolean isFileOwner(@PathVariable Long userId, @PathVariable Long fileId) {
+        return userService.isFileOwner(userId, fileId);
     }
 
 }

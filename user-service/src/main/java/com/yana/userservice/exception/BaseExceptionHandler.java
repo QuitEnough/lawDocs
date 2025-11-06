@@ -15,14 +15,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(PSQLException.class)
-    public final ResponseEntity<ErrorResponse> handlePSQLException(PSQLException ex) {
-        log.error(ex.getMessage(), ex);
-
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorResponse.getStatusCode()));
-    }
-
     @ExceptionHandler(ConstraintViolationException.class)
     public final ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         log.error(ex.getMessage(), ex);

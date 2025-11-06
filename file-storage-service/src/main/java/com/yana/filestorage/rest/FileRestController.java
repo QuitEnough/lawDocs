@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +34,11 @@ public class FileRestController {
     public ResponseEntity<Void> uploadFile(@RequestParam String name,
                                            @RequestParam @NotNull MultipartFile file,
                                            @RequestParam(name = "directory_id", required = false) Long directoryId) {
-//        var authentication = SecurityContextHolder.getContext().getAuthentication();
-//        var user = (UserDetailsImpl) authentication.getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var user = (UserDetailsImpl) authentication.getPrincipal();
 
         log.info("[FileController] Request to services for saving user with name {} and the file {}", name, file);
-//        long fileId = fileService.save(name, directoryId, user.getId());
-        long fileId = fileService.save(name, directoryId);
+        long fileId = fileService.save(name, directoryId, user.getId());
         UUID uuid = fileService.find(fileId);
         minioService.save(uuid, file);
 
@@ -64,12 +64,6 @@ public class FileRestController {
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/files/{fileId}/owner/{userId}")
-    public Boolean isFileOwner(@PathVariable Long fileId, @PathVariable Long userId) {
-        // Логика проверки владельца файла
-        return fileService.isFileOwner(fileId, userId);
     }
 
 }

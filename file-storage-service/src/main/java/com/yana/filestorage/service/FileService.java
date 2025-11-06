@@ -8,8 +8,7 @@ import java.util.UUID;
 
 public interface FileService {
 
-//    Long save(String name, Long directoryId, Long userId);
-    Long save(String name, Long directoryId);
+    Long save(String name, Long directoryId, Long userId);
 
     void delete(Long fileId);
 
