@@ -1,10 +1,10 @@
 package com.yana.filestorage.config;
 
+import com.yana.filestorage.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String BEARER_PREFIX = "Bearer ";
@@ -37,20 +36,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authorization = req.getHeader(AUTHORIZATION_HEADER_NAME);
-        log.info("authorization {}", authorization);
 
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(req, resp);
             return;
         }
-        log.info("authorization passed");
 
         final String jwtToken = authorization.substring(BEARER_PREFIX.length());
         final String username = jwtService.extractEmail(jwtToken);
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            log.info("userDetails {}", userDetails);
 
             if (jwtService.isValid(jwtToken, userDetails.getUsername()) && userDetails.isEnabled()
                     && userDetails.isAccountNonLocked()) {

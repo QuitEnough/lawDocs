@@ -26,9 +26,4 @@ public class UserRestController {
         return List.of();
     }
 
-    @GetMapping("/{userId}/files/{fileId}/owner")
-    public Boolean isFileOwner(@PathVariable Long userId, @PathVariable Long fileId) {
-        return userService.isFileOwner(userId, fileId);
-    }
-
 }

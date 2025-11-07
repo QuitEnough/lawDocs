@@ -46,7 +46,9 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void delete(Long fileId) {
-        if (fileRepository.findById(fileId).isPresent()) {
+        Optional<File> file = fileRepository.findById(fileId);
+        if (file.isPresent()) {
+            minioService.delete(file.get().getUuid());
             fileRepository.deleteById(fileId);
         } else {
             throw new FileActionException("The file is not present");

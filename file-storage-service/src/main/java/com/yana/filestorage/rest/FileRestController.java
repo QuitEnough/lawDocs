@@ -1,6 +1,8 @@
 package com.yana.filestorage.rest;
 
+import com.yana.filestorage.entity.UserDetailsImpl;
 import com.yana.filestorage.exception.FileActionException;
+import com.yana.filestorage.service.CustomUserDetailsService;
 import com.yana.filestorage.service.FileService;
 import com.yana.filestorage.service.MinioService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,8 +28,8 @@ import java.util.UUID;
 public class FileRestController {
 
     private final FileService fileService;
-
     private final MinioService minioService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Transactional
     @PostMapping("/upload")
@@ -47,8 +49,20 @@ public class FileRestController {
     }
 
     @GetMapping("/find")
-    public void findFile(@RequestParam Long fileId, HttpServletResponse response) {
+    public void findFile(@RequestParam Long fileId,
+                         HttpServletResponse response,
+                         @RequestHeader("Authorization") String authToken) {
         log.info("[RequestParams] finding the file with id {}", fileId);
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var user = (UserDetailsImpl) authentication.getPrincipal();
+
+        // Проверяем, является ли пользователь владельцем файла
+        boolean isOwner = customUserDetailsService.isFileOwner(user.getId(), fileId, authToken);
+        if (!isOwner) {
+            throw new FileActionException("Access denied");
+        }
+
         try (InputStream stream = fileService.download(fileId)) {
             response.setHeader("Content-Disposition", "attachment");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -59,8 +73,19 @@ public class FileRestController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId) {
+    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId,
+                                           @RequestHeader("Authorization") String authToken) {
         log.info("[RequestParams] deleting the file with id {}", fileId);
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var user = (UserDetailsImpl) authentication.getPrincipal();
+
+        // Проверяем, является ли пользователь владельцем файла
+        boolean isOwner = customUserDetailsService.isFileOwner(user.getId(), fileId, authToken);
+        if (!isOwner) {
+            throw new FileActionException("Access denied");
+        }
+
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
         return new ResponseEntity<>(HttpStatus.OK);

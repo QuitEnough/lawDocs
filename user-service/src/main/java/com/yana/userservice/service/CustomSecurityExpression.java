@@ -16,12 +16,12 @@ public class CustomSecurityExpression {
         this.userService = userService;
     }
 
-    public boolean canUseFile(final Long fileId) {
-        UserDetailsImpl user = getPrincipal();
-        Long id = user.getId();
-
-        return userService.isFileOwner(id, fileId);
-    }
+//    public boolean canUseFile(final Long fileId) {
+//        UserDetailsImpl user = getPrincipal();
+//        Long id = user.getId();
+//
+//        return userService.isFileOwner(id, fileId);
+//    }
 
     private UserDetailsImpl getPrincipal() {
         Authentication authentication = SecurityContextHolder

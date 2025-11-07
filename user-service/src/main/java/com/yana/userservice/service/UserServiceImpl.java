@@ -66,11 +66,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isFileOwner(Long userId, Long fileId) {
-        return userRepository.isFileOwner(userId, fileId);
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with given email is not found"));

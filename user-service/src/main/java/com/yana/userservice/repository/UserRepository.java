@@ -15,12 +15,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query(value = """
-            SELECT COUNT(f) > 0 
-            FROM File f 
-            WHERE f.id = :fileId 
-            AND f.userId = :userId
-            """)
-    boolean isFileOwner(@Param("userId") Long userId, @Param("fileId") Long fileId);
-
 }

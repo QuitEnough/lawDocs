@@ -9,15 +9,14 @@ services:
     ports:
       - "8084:8084"
     environment:
-      HOST_DB: db
+      HOST_DB: user-db
       PORT_DB: 5432
-      NAME_DB: ${NAME_DB}
+      NAME_DB: ${USER_DB_NAME}
       USER_DB: ${USER_DB}
       PASSWORD_DB: ${PASSWORD_DB}
       TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
-
     depends_on:
-      postgres:
+      user-db:
         condition: service_healthy
 
   file-storage-service:
@@ -29,9 +28,9 @@ services:
     ports:
       - "8082:8082"
     environment:
-      HOST_DB: db
+      HOST_DB: file-db
       PORT_DB: 5432
-      NAME_DB: ${NAME_DB}
+      NAME_DB: ${FILE_DB_NAME}
       USER_DB: ${USER_DB}
       PASSWORD_DB: ${PASSWORD_DB}
       TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
@@ -42,26 +41,46 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
       MINIO_URL: ${MINIO_URL}
       MINIO_PORT: ${MINIO_PORT}
+      USER_SERVICE_URL: http://user-service:8084
     depends_on:
-      postgres:
+      file-db:
         condition: service_healthy
       minio:
         condition: service_healthy
 
-  postgres:
+  user-db:
     image: postgres:16-alpine
-    container_name: postgres
+    container_name: user-db
     restart: always
     ports:
-      - "8888:5432"
+      - "8889:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${USER_DB}
       POSTGRES_PASSWORD: ${PASSWORD_DB}
-      POSTGRES_DB: ${NAME_DB}
+      POSTGRES_DB: ${USER_DB_NAME}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${USER_DB} -d ${NAME_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${USER_DB} -d ${USER_DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  file-db:
+    image: postgres:16-alpine
+    container_name: file-db
+    restart: always
+    ports:
+      - "8890:5432"
+    volumes:
+      - file_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${USER_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
+      POSTGRES_DB: ${FILE_DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${USER_DB} -d ${FILE_DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -96,5 +115,6 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  user_data:
+  file_data:
   minio-storage:

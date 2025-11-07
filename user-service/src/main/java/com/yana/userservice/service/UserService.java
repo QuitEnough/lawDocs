@@ -18,8 +18,6 @@ public interface UserService extends UserDetailsService {
 
     List<?> getUserByValue(String value);
 
-    boolean isFileOwner(Long userId, Long fileId);
-
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 }

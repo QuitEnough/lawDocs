@@ -4,9 +4,10 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: "jdbc:postgresql://${HOST_DB}:${PORT_DB}/${NAME_DB}"
+    url: "jdbc:postgresql://${HOST_DB}:${PORT_FILE_DB}/${FILE_DB_NAME}"
     username: ${USER_DB}
     password: ${PASSWORD_DB}
+
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -39,4 +40,4 @@ logging:
 
 user:
   service:
-    url: http://user-service:8084
+    url: ${USER_SERVICE_URL:http://user-service:8084}

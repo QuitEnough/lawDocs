@@ -26,9 +26,8 @@
         <java.version>17</java.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <spring-boot.version>3.5.6</spring-boot.version>
-        <spring-cloud.version>2025.0.0</spring-cloud.version>
         <postgresql.version>42.7.5</postgresql.version>
-        <flyway.version>10.15.2</flyway.version>
+        <flyway.version>11.0.0</flyway.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <org.jetbrains.annotations.version>26.0.2</org.jetbrains.annotations.version>
         <jakarta.validation.version>3.1.0</jakarta.validation.version>
@@ -54,15 +53,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring-boot.version}</version>
-            </dependency>
-
-            <!-- Spring Cloud -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <!-- Security -->
@@ -154,14 +144,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
+<!--                <configuration>-->
+<!--                    <annotationProcessorPaths>-->
+<!--                        <path>-->
+<!--                            <groupId>org.projectlombok</groupId>-->
+<!--                            <artifactId>lombok</artifactId>-->
+<!--                        </path>-->
+<!--                    </annotationProcessorPaths>-->
+<!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
