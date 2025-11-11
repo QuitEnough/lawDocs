@@ -8,9 +8,10 @@ import com.yana.filestorage.service.MinioService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -31,6 +32,7 @@ public class FileRestController {
     private final MinioService minioService;
     private final CustomUserDetailsService customUserDetailsService;
 
+    @PreAuthorize("isAuthenticated()")
     @Transactional
     @PostMapping("/upload")
     public ResponseEntity<Void> uploadFile(@RequestParam String name,
@@ -48,6 +50,7 @@ public class FileRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @GetMapping("/find")
     public void findFile(@RequestParam Long fileId,
                          HttpServletResponse response,
@@ -72,6 +75,7 @@ public class FileRestController {
         }
     }
 
+    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId,
                                            @RequestHeader("Authorization") String authToken) {
@@ -88,6 +92,17 @@ public class FileRestController {
 
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
+    @PutMapping("/rename")
+    public ResponseEntity<Void> renameFile(@RequestParam Long fileId,
+                                           @RequestParam String newName) {
+        log.info("[Request] renaming file with id {} to {}", fileId, newName);
+        fileService.renameFile(fileId, newName);
+
+        log.info("[Response] file renamed successfully");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

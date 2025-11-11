@@ -2,14 +2,17 @@ package com.yana.filestorage.service.impl;
 
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.entity.File;
-import com.yana.filestorage.exception.FileActionException;
 import com.yana.filestorage.exception.DirectoryNotFoundException;
+import com.yana.filestorage.exception.FileActionException;
+import com.yana.filestorage.exception.FileAlreadyExistsException;
+import com.yana.filestorage.exception.FileNotFoundException;
 import com.yana.filestorage.repository.DirectoryRepository;
 import com.yana.filestorage.repository.FileRepository;
 import com.yana.filestorage.service.FileService;
 import com.yana.filestorage.service.MinioService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.List;
@@ -89,6 +92,33 @@ public class FileServiceImpl implements FileService {
     public boolean isFileOwner(Long fileId, Long userId) {
         Optional<File> file = fileRepository.findById(fileId);
         return file.isPresent() && file.get().getUserId().equals(userId);
+    }
+
+    @Transactional
+    @Override
+    public void renameFile(Long fileId, String newName) {
+        var file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new FileNotFoundException("File not found"));
+
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new FileActionException("File name cannot be empty");
+        }
+
+        if (newName.equals(file.getName())) {
+            return;
+        }
+
+        var fileExists = fileRepository.existsByNameAndDirectoryIdAndUserId(
+                newName,
+                file.getDirectory().getId(),
+                file.getUserId());
+
+        if (fileExists) {
+            throw new FileAlreadyExistsException("File with this name already exists in the same directory");
+        }
+
+        file.setName(newName);
+        fileRepository.save(file);
     }
 
 }

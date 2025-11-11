@@ -1,10 +1,12 @@
 package com.yana.filestorage.repository;
 
 import com.yana.filestorage.entity.Directory;
-import org.jetbrains.annotations.NotNull;
 import com.yana.filestorage.entity.File;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,4 +30,14 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     @EntityGraph(attributePaths = {"directory"})
     List<File> findFilesWithDirectoryByUserId(Long userId);
+
+    @Query("SELECT COUNT(f) > 0 "
+            + "FROM File f "
+            + "WHERE f.name = :name "
+            + "AND f.directory.id = :directoryId "
+            + "AND f.userId = :userId")
+    boolean existsByNameAndDirectoryIdAndUserId(@Param("name") String name,
+                                                @Param("directoryId") Long directoryId,
+                                                @Param("userId") Long userId);
+
 }

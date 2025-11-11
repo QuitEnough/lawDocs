@@ -13,6 +13,62 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(AccessDeniedException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(UserNotAuthenticatedException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(UserNotAuthenticatedException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(FileAlreadyExistsException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(FileAlreadyExistsException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(DirectoryAlreadyExists.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryAlreadyExists ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(DirectoryNotFoundException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(FileNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
+    @ExceptionHandler(DirectoryActionException.class)
+    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryActionException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.statusCode()));
+    }
+
     @ExceptionHandler(FileActionException.class)
     public final ResponseEntity<ErrorResponse> handleFileActionException(FileActionException ex) {
         log.error(ex.getMessage(), ex);
