@@ -2,7 +2,6 @@ package com.yana.filestorage.rest;
 
 import com.yana.filestorage.entity.UserDetailsImpl;
 import com.yana.filestorage.exception.FileActionException;
-import com.yana.filestorage.service.CustomUserDetailsService;
 import com.yana.filestorage.service.FileService;
 import com.yana.filestorage.service.MinioService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +29,6 @@ public class FileRestController {
 
     private final FileService fileService;
     private final MinioService minioService;
-    private final CustomUserDetailsService customUserDetailsService;
 
     @PreAuthorize("isAuthenticated()")
     @Transactional

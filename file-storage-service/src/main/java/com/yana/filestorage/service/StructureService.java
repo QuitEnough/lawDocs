@@ -26,8 +26,6 @@ public class StructureService {
 
     public Node getDataForCertainDir(Long directoryId) {
 
-        var directory = Directory.builder().id(directoryId).build();
-
         List<Directory> dirs = directoryService.findAllDirectoriesInCertainDir(directoryId);
         List<NodeDir> nodeDirList = new ArrayList<>();
 
