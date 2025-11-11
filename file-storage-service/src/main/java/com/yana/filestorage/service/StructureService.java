@@ -9,6 +9,8 @@ import com.yana.filestorage.repository.FileRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,9 +21,7 @@ import java.util.stream.Collectors;
 public class StructureService {
 
     private final FileService fileService;
-
     private final DirectoryService directoryService;
-
     private final FileRepository fileRepository;
 
     public Node getDataForCertainDir(Long directoryId) {
@@ -64,31 +64,78 @@ public class StructureService {
                         .id(e.getId())
                         .name(e.getName())
                         .parentId(e.getParentId())
-                        .childrenDirs(new ArrayList<>())
-                        .files(new ArrayList<>())
+                        .childrenDirs(List.of())
+                        .files(List.of())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
         // Строим дерево используя Map для быстрого доступа
+        MultiValueMap<Long, NodeDir> childrenMap = new LinkedMultiValueMap<>();
         Map<Long, NodeDir> dirMap = new HashMap<>();
         List<NodeDir> rootList = new ArrayList<>();
 
-        // Сначала создаем map всех директорий
+        // Сначала создаем map всех директорий и собираем детей
         for (NodeDir dir : all) {
             dirMap.put(dir.id(), dir);
-        }
-
-        // Затем строим иерархию
-        for (NodeDir dir : all) {
             if (dir.parentId() == null) {
                 rootList.add(dir);
             } else {
-                NodeDir parent = dirMap.get(dir.parentId());
-                if (parent != null && parent.childrenDirs() != null) {
-                    parent.childrenDirs().add(dir);
-                }
+                childrenMap.add(dir.parentId(), dir);
             }
         }
+
+        List<NodeDir> mutableRootList = new ArrayList<>();
+        Map<Long, NodeDir> mutableDirMap = new HashMap<>();
+
+        // Заменяем immutable списки на mutable и заполняем детей
+        for (NodeDir dir : all) {
+            // Создаем mutable копии
+            List<NodeDir> mutableChildren = new ArrayList<>(
+                    childrenMap.getOrDefault(dir.id(), Collections.emptyList())
+            );
+
+            // Создаем новую NodeDir с mutable списками
+            NodeDir mutableDir = NodeDir.builder()
+                    .type("dir")
+                    .id(dir.id())
+                    .name(dir.name())
+                    .parentId(dir.parentId())
+                    .childrenDirs(mutableChildren)
+                    .files(new ArrayList<>())
+                    .build();
+
+            mutableDirMap.put(dir.id(), mutableDir);
+
+            if (dir.parentId() == null) {
+                mutableRootList.add(mutableDir);
+            }
+        }
+
+        // Теперь нужно обновить parent ссылки в детях
+        for (NodeDir mutableDir : mutableDirMap.values()) {
+            if (mutableDir.childrenDirs() != null && !mutableDir.childrenDirs().isEmpty()) {
+                List<NodeDir> updatedChildren = mutableDir.childrenDirs().stream()
+                        .map(child -> mutableDirMap.get(child.id()))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                // Здесь проблема - NodeDir immutable, нужно пересоздать
+                mutableDir = NodeDir.builder()
+                        .type(mutableDir.type())
+                        .id(mutableDir.id())
+                        .name(mutableDir.name())
+                        .parentId(mutableDir.parentId())
+                        .childrenDirs(updatedChildren)
+                        .files(mutableDir.files())
+                        .build();
+                mutableDirMap.put(mutableDir.id(), mutableDir);
+            }
+        }
+
+        // Обновляем rootList
+        mutableRootList = mutableRootList.stream()
+                .map(root -> mutableDirMap.get(root.id()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return process(userId, rootList);
     }
