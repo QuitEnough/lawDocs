@@ -53,18 +53,8 @@ public class FileRestController {
     @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @GetMapping("/find")
     public void findFile(@RequestParam Long fileId,
-                         HttpServletResponse response,
-                         @RequestHeader("Authorization") String authToken) {
+                         HttpServletResponse response) {
         log.info("[RequestParams] finding the file with id {}", fileId);
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var user = (UserDetailsImpl) authentication.getPrincipal();
-
-        // Проверяем, является ли пользователь владельцем файла
-        boolean isOwner = customUserDetailsService.isFileOwner(user.getId(), fileId, authToken);
-        if (!isOwner) {
-            throw new FileActionException("Access denied");
-        }
 
         try (InputStream stream = fileService.download(fileId)) {
             response.setHeader("Content-Disposition", "attachment");
@@ -77,18 +67,8 @@ public class FileRestController {
 
     @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId,
-                                           @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId) {
         log.info("[RequestParams] deleting the file with id {}", fileId);
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var user = (UserDetailsImpl) authentication.getPrincipal();
-
-        // Проверяем, является ли пользователь владельцем файла
-        boolean isOwner = customUserDetailsService.isFileOwner(user.getId(), fileId, authToken);
-        if (!isOwner) {
-            throw new FileActionException("Access denied");
-        }
 
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);

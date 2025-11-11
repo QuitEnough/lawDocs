@@ -60,7 +60,7 @@ public class DirectoryRestController {
 
     @PreAuthorize("@UserAccessor.canUserAccessResource('dir', #directoryId)")
     @PutMapping("/rename")
-    public ResponseEntity<Void> renameDirectory(@PathVariable Long directoryId,
+    public ResponseEntity<Void> renameDirectory(@RequestParam Long directoryId,
                                                 @RequestParam String newName) {
         log.info("[Request] renaming directory with id {} to {}", directoryId, newName);
         directoryService.renameDirectory(directoryId, newName);
