@@ -8,8 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "directories")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

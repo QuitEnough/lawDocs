@@ -7,8 +7,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "files")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
