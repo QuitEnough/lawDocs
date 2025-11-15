@@ -41,3 +41,7 @@ logging:
 user:
   service:
     url: ${USER_SERVICE_URL:http://user-service:8084}
+
+token:
+  signing:
+    key: ${TOKEN_SIGNING_KEY}

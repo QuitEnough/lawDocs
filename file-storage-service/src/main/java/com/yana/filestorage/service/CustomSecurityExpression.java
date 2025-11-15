@@ -61,7 +61,7 @@ public class CustomSecurityExpression {
     }
 
     private boolean isUserExists(Long userId) {
-        String url = userServiceUrl + "/users/" + "/exists";
+        String url = userServiceUrl + "/users/" + userId + "/exists";
 
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Void> entity = new HttpEntity<>(headers);

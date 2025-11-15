@@ -1,12 +1,13 @@
 package com.yana.userservice.exception;
 
-import com.yana.userservice.dto.ErrorResponse;
+import com.yana.user_service.api.dto.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -31,8 +32,8 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public final ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public final ResponseEntity<ErrorResponse> handleUserNotFoundException(UsernameNotFoundException ex) {
         log.error(ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());

@@ -20,6 +20,10 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
-token:
-  signing:
-    key: ${TOKEN_SIGNING_KEY}
+application:
+  security:
+    jwt:
+      secret-key: ${TOKEN_SIGNING_KEY}
+      expiration: ${TOKEN_EXPIRATION}
+      refresh-token:
+        expiration: ${TOKEN_REFRESH_EXPIRATION}

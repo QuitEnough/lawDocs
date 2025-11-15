@@ -16,8 +16,9 @@ public class JwtService {
 
     private final Key key;
 
-    public JwtService(@Value("${TOKEN_SIGNING_KEY}") String signingKey) {
-        this.key = Keys.hmacShaKeyFor(signingKey.getBytes());
+    public JwtService() {
+        String key = "53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327855";
+        this.key = Keys.hmacShaKeyFor(key.getBytes());
     }
 
     public String extractEmail(String token) {

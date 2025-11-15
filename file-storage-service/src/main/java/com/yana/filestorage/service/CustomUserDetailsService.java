@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Optional;
 
@@ -28,16 +29,33 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        try {
-            // Для JWT аутентификации достаточно базовой информации
-            // В реальном сценарии можно сделать запрос к user-service для проверки пользователя
-            return UserDetailsImpl.builder()
-                    .email(email)
-                    .password("") // Пароль не проверяется при JWT
-                    .role("USER")
-                    .build();
+        final String url = UriComponentsBuilder
+                .fromHttpUrl(userServiceUrl)
+                .path("/users/by-email")
+                .queryParam("email", email)
+                .build()
+                .toUriString();
 
-        } catch (Exception e) {
+        try {
+            ResponseEntity<UserInfo> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    HttpEntity.EMPTY,
+                    UserInfo.class
+            );
+
+            UserInfo userInfo = response.getBody();
+            if (userInfo == null || userInfo.getEmail() == null) {
+                throw new UsernameNotFoundException("User not found with email: " + email);
+            }
+
+            return UserDetailsImpl.builder()
+                    .id(userInfo.getUserId())
+                    .email(userInfo.getEmail())
+                    .password("") // пароль не нужен для JWT-потока в этом сервисе
+                    .role(userInfo.getRole())
+                    .build();
+        } catch (Exception ex) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
     }
