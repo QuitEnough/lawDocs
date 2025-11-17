@@ -1,7 +1,6 @@
 package com.yana.userservice.service;
 
 import com.yana.userservice.entity.User;
-import com.yana.userservice.exception.BaseException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
