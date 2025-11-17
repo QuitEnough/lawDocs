@@ -14,6 +14,8 @@ public interface DirectoryService {
 
     boolean isDirectoryOwner(Long directoryId, Long userId);
 
+    void ensureDirectoryOwnership(Long directoryId, Long userId);
+
     Directory createDirectory(String name, Long parentId, Long userId);
 
     void renameDirectory(Long directoryId, String newName);

@@ -1,17 +1,16 @@
 package com.yana.filestorage.rest;
 
-import com.yana.filestorage.entity.UserDetailsImpl;
 import com.yana.filestorage.exception.FileActionException;
 import com.yana.filestorage.service.FileService;
 import com.yana.filestorage.service.MinioService;
+import com.yana.filestorage.service.TokenExtractor;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
@@ -29,18 +28,18 @@ public class FileRestController {
 
     private final FileService fileService;
     private final MinioService minioService;
+    private final TokenExtractor tokenExtractor;
 
-    @PreAuthorize("isAuthenticated()")
     @Transactional
     @PostMapping("/upload")
     public ResponseEntity<Void> uploadFile(@RequestParam String name,
                                            @RequestParam @NotNull MultipartFile file,
-                                           @RequestParam(name = "directory_id", required = false) Long directoryId) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var user = (UserDetailsImpl) authentication.getPrincipal();
+                                           @RequestParam(name = "directory_id", required = false) Long directoryId,
+                                           HttpServletRequest request) {
+        var user = tokenExtractor.extractFromRequest(request);
 
-        log.info("[FileController] Request to services for saving user with name {} and the file {}", name, file);
-        long fileId = fileService.save(name, directoryId, user.getId());
+        log.info("[FileController] Uploading file '{}' for user {}", name, user.userId());
+        long fileId = fileService.save(name, directoryId, user.userId());
         UUID uuid = fileService.find(fileId);
         minioService.save(uuid, file);
 
@@ -48,12 +47,14 @@ public class FileRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @GetMapping("/find")
     public void findFile(@RequestParam Long fileId,
+                         HttpServletRequest request,
                          HttpServletResponse response) {
-        log.info("[RequestParams] finding the file with id {}", fileId);
+        var user = tokenExtractor.extractFromRequest(request);
+        fileService.ensureFileOwnership(fileId, user.userId());
 
+        log.info("[Request] Finding file {} for user {}", fileId, user.userId());
         try (InputStream stream = fileService.download(fileId)) {
             response.setHeader("Content-Disposition", "attachment");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -63,21 +64,26 @@ public class FileRestController {
         }
     }
 
-    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId) {
-        log.info("[RequestParams] deleting the file with id {}", fileId);
+    public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId,
+                                           HttpServletRequest request) {
+        var user = tokenExtractor.extractFromRequest(request);
+        fileService.ensureFileOwnership(fileId, user.userId());
 
+        log.info("[Request] Deleting file {} for user {}", fileId, user.userId());
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PreAuthorize("@UserAccessor.canUserAccessResource('file', #fileId)")
     @PutMapping("/rename")
     public ResponseEntity<Void> renameFile(@RequestParam Long fileId,
-                                           @RequestParam String newName) {
-        log.info("[Request] renaming file with id {} to {}", fileId, newName);
+                                           @RequestParam String newName,
+                                           HttpServletRequest request) {
+        var user = tokenExtractor.extractFromRequest(request);
+        fileService.ensureFileOwnership(fileId, user.userId());
+
+        log.info("[Request] renaming file with id {} to '{} for user {}'", fileId, newName, user.userId());
         fileService.renameFile(fileId, newName);
 
         log.info("[Response] file renamed successfully");

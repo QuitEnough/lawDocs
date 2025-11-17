@@ -22,6 +22,8 @@ public interface FileService {
 
     boolean isFileOwner(Long fileId, Long userId);
 
+    void ensureFileOwnership(Long fileId, Long userId);
+
     void renameFile(Long fileId, String newName);
 
 }

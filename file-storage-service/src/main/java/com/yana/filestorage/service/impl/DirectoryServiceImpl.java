@@ -41,6 +41,13 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directory.isPresent() && directory.get().getUserId().equals(userId);
     }
 
+    @Override
+    public void ensureDirectoryOwnership(Long directoryId, Long userId) {
+        if (!isDirectoryOwner(directoryId, userId)) {
+            throw new AccessDeniedException("Directory does not belong to user");
+        }
+    }
+
     @Transactional
     @Override
     public Directory createDirectory(String name, Long parentId, Long userId) {

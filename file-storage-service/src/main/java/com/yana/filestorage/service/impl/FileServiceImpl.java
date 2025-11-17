@@ -2,10 +2,7 @@ package com.yana.filestorage.service.impl;
 
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.entity.File;
-import com.yana.filestorage.exception.DirectoryNotFoundException;
-import com.yana.filestorage.exception.FileActionException;
-import com.yana.filestorage.exception.FileAlreadyExistsException;
-import com.yana.filestorage.exception.FileNotFoundException;
+import com.yana.filestorage.exception.*;
 import com.yana.filestorage.repository.DirectoryRepository;
 import com.yana.filestorage.repository.FileRepository;
 import com.yana.filestorage.service.FileService;
@@ -92,6 +89,13 @@ public class FileServiceImpl implements FileService {
     public boolean isFileOwner(Long fileId, Long userId) {
         Optional<File> file = fileRepository.findById(fileId);
         return file.isPresent() && file.get().getUserId().equals(userId);
+    }
+
+    @Override
+    public void ensureFileOwnership(Long fileId, Long userId) {
+        if (!isFileOwner(fileId, userId)) {
+            throw new AccessDeniedException("File does not belong to user");
+        }
     }
 
     @Transactional
