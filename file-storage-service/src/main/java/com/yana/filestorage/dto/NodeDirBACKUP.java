@@ -6,11 +6,11 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record NodeDir(
+public record NodeDirBACKUP(
         String type,
         Long id,
         String name,
         @JsonIgnore Long parentId,
-        @JsonIgnore List<NodeDir> childrenDirs,
-        @JsonIgnore List<NodeFile> files
+        @JsonIgnore List<NodeDirBACKUP> childrenDirs,
+        @JsonIgnore List<NodeFileBACKUP> files
 ) { }

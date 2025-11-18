@@ -1,8 +1,8 @@
 package com.yana.filestorage.service;
 
-import com.yana.filestorage.dto.Node;
-import com.yana.filestorage.dto.NodeDir;
-import com.yana.filestorage.dto.NodeFile;
+import com.yana.filestorage.dto.NodeBACKUP;
+import com.yana.filestorage.dto.NodeDirBACKUP;
+import com.yana.filestorage.dto.NodeFileBACKUP;
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.entity.File;
 import com.yana.filestorage.repository.FileRepository;
@@ -24,40 +24,40 @@ public class StructureService {
     private final DirectoryService directoryService;
     private final FileRepository fileRepository;
 
-    public Node getDataForCertainDir(Long directoryId) {
+    public NodeBACKUP getDataForCertainDir(Long directoryId) {
 
         List<Directory> dirs = directoryService.findAllDirectoriesInCertainDir(directoryId);
-        List<NodeDir> nodeDirList = new ArrayList<>();
+        List<NodeDirBACKUP> nodeDirBACKUPList = new ArrayList<>();
 
         for (Directory dir : dirs) {
-            NodeDir nodeDir = NodeDir.builder()
+            NodeDirBACKUP nodeDirBACKUP = NodeDirBACKUP.builder()
                     .type("dir")
                     .id(dir.getId())
                     .name(dir.getName())
                     .build();
-            nodeDirList.add(nodeDir);
+            nodeDirBACKUPList.add(nodeDirBACKUP);
         }
 
         List<File> files = fileService.findAllFilesInCertainDir(directoryId);
-        List<NodeFile> nodeFileList = new ArrayList<>();
+        List<NodeFileBACKUP> nodeFileBACKUPList = new ArrayList<>();
 
         for (File file : files) {
-            NodeFile nodeFile = NodeFile.builder()
+            NodeFileBACKUP nodeFileBACKUP = NodeFileBACKUP.builder()
                     .type("file")
                     .id(file.getId())
                     .name(file.getName())
                     .build();
-            nodeFileList.add(nodeFile);
+            nodeFileBACKUPList.add(nodeFileBACKUP);
         }
 
-        return Node.generateNode(nodeDirList, nodeFileList);
+        return NodeBACKUP.generateNode(nodeDirBACKUPList, nodeFileBACKUPList);
     }
 
     //TODO: будет работать, если убрать аннотацию JsonIgnore или сделать dto response. Подумать, для чего этот метод
-    public Node getRootDirsWithFilesForUser(Long userId) {
-        List<NodeDir> all = directoryService.findDirectoryByUserId(userId)
+    public NodeBACKUP getRootDirsWithFilesForUser(Long userId) {
+        List<NodeDirBACKUP> all = directoryService.findDirectoryByUserId(userId)
                 .stream()
-                .map(e -> NodeDir.builder()
+                .map(e -> NodeDirBACKUP.builder()
                         .type("dir")
                         .id(e.getId())
                         .name(e.getName())
@@ -68,12 +68,12 @@ public class StructureService {
                 .toList();
 
         // Строим дерево используя Map для быстрого доступа
-        MultiValueMap<Long, NodeDir> childrenMap = new LinkedMultiValueMap<>();
-        Map<Long, NodeDir> dirMap = new HashMap<>();
-        List<NodeDir> rootList = new ArrayList<>();
+        MultiValueMap<Long, NodeDirBACKUP> childrenMap = new LinkedMultiValueMap<>();
+        Map<Long, NodeDirBACKUP> dirMap = new HashMap<>();
+        List<NodeDirBACKUP> rootList = new ArrayList<>();
 
         // Сначала создаем map всех директорий и собираем детей
-        for (NodeDir dir : all) {
+        for (NodeDirBACKUP dir : all) {
             dirMap.put(dir.id(), dir);
             if (dir.parentId() == null) {
                 rootList.add(dir);
@@ -82,18 +82,18 @@ public class StructureService {
             }
         }
 
-        List<NodeDir> mutableRootList = new ArrayList<>();
-        Map<Long, NodeDir> mutableDirMap = new HashMap<>();
+        List<NodeDirBACKUP> mutableRootList = new ArrayList<>();
+        Map<Long, NodeDirBACKUP> mutableDirMap = new HashMap<>();
 
         // Заменяем immutable списки на mutable и заполняем детей
-        for (NodeDir dir : all) {
+        for (NodeDirBACKUP dir : all) {
             // Создаем mutable копии
-            List<NodeDir> mutableChildren = new ArrayList<>(
+            List<NodeDirBACKUP> mutableChildren = new ArrayList<>(
                     childrenMap.getOrDefault(dir.id(), Collections.emptyList())
             );
 
             // Создаем новую NodeDir с mutable списками
-            NodeDir mutableDir = NodeDir.builder()
+            NodeDirBACKUP mutableDir = NodeDirBACKUP.builder()
                     .type("dir")
                     .id(dir.id())
                     .name(dir.name())
@@ -110,14 +110,14 @@ public class StructureService {
         }
 
         // Теперь нужно обновить parent ссылки в детях
-        for (NodeDir mutableDir : mutableDirMap.values()) {
+        for (NodeDirBACKUP mutableDir : mutableDirMap.values()) {
             if (mutableDir.childrenDirs() != null && !mutableDir.childrenDirs().isEmpty()) {
-                List<NodeDir> updatedChildren = mutableDir.childrenDirs().stream()
+                List<NodeDirBACKUP> updatedChildren = mutableDir.childrenDirs().stream()
                         .map(child -> mutableDirMap.get(child.id()))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
                 // Здесь проблема - NodeDir immutable, нужно пересоздать
-                mutableDir = NodeDir.builder()
+                mutableDir = NodeDirBACKUP.builder()
                         .type(mutableDir.type())
                         .id(mutableDir.id())
                         .name(mutableDir.name())
@@ -138,18 +138,18 @@ public class StructureService {
         return process(userId, rootList);
     }
 
-    public Node process(Long userId, List<NodeDir> nodeDirs) {
-        List<NodeFile> topFiles = new ArrayList<>();
+    public NodeBACKUP process(Long userId, List<NodeDirBACKUP> nodeDirBACKUPS) {
+        List<NodeFileBACKUP> topFiles = new ArrayList<>();
 
         // Получаем все файлы пользователя
         List<File> allFiles = fileRepository.findFilesWithDirectoryByUserId(userId);
         log.debug("Found {} files for user {}", allFiles.size(), userId);
 
         // Создаем map для быстрого доступа к файлам по directoryId
-        Map<Long, List<NodeFile>> filesByDirectory = new HashMap<>();
+        Map<Long, List<NodeFileBACKUP>> filesByDirectory = new HashMap<>();
 
         for (File file : allFiles) {
-            NodeFile nodeFile = NodeFile.builder()
+            NodeFileBACKUP nodeFileBACKUP = NodeFileBACKUP.builder()
                     .type("file")
                     .id(file.getId())
                     .name(file.getName())
@@ -158,22 +158,22 @@ public class StructureService {
 
             Long directoryId = file.getDirectory().getId();
             if (directoryId == null) {
-                topFiles.add(nodeFile);
+                topFiles.add(nodeFileBACKUP);
             } else {
-                filesByDirectory.computeIfAbsent(directoryId, k -> new ArrayList<>()).add(nodeFile);
+                filesByDirectory.computeIfAbsent(directoryId, k -> new ArrayList<>()).add(nodeFileBACKUP);
             }
         }
 
         // Распределяем файлы по директориям используя BFS
-        Queue<NodeDir> queue = new LinkedList<>(nodeDirs);
+        Queue<NodeDirBACKUP> queue = new LinkedList<>(nodeDirBACKUPS);
         int processedDirs = 0;
 
         while (!queue.isEmpty()) {
-            NodeDir currentDir = queue.poll();
+            NodeDirBACKUP currentDir = queue.poll();
             processedDirs++;
 
             // Добавляем файлы для текущей директории
-            List<NodeFile> dirFiles = filesByDirectory.get(currentDir.id());
+            List<NodeFileBACKUP> dirFiles = filesByDirectory.get(currentDir.id());
             if (dirFiles != null) {
                 currentDir.files().addAll(dirFiles);
             }
@@ -184,7 +184,7 @@ public class StructureService {
             }
         }
 
-        return Node.generateNode(nodeDirs, topFiles);
+        return NodeBACKUP.generateNode(nodeDirBACKUPS, topFiles);
     }
 
 }

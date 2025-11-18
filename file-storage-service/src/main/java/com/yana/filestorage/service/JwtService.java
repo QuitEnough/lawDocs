@@ -1,6 +1,6 @@
 package com.yana.filestorage.service;
 
-import com.yana.filestorage.dto.UserInfo;
+import com.yana.filestorage.dto.UserInfoBACKUP;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -20,7 +20,7 @@ public class JwtService {
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public UserInfo extractUserInfo(String token) {
+    public UserInfoBACKUP extractUserInfo(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(signingKey)
                 .build()
@@ -31,7 +31,7 @@ public class JwtService {
         String email = claims.getSubject();
         String role = claims.get("role", String.class);
 
-        return new UserInfo(userId, email, role);
+        return new UserInfoBACKUP(userId, email, role);
     }
 
 }

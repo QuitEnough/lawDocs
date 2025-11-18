@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 
 @Builder
-public record NodeFile(
+public record NodeFileBACKUP(
         String type,
         Long id,
         String name,

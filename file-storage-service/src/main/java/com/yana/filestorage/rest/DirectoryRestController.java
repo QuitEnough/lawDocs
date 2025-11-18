@@ -1,6 +1,6 @@
 package com.yana.filestorage.rest;
 
-import com.yana.filestorage.dto.Node;
+import com.yana.filestorage.dto.NodeBACKUP;
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.exception.AccessDeniedException;
 import com.yana.filestorage.service.DirectoryService;
@@ -24,8 +24,8 @@ public class DirectoryRestController {
     private final TokenExtractor tokenExtractor;
 
     @GetMapping
-    public Node getDataForDir(@RequestParam("id") Long directoryId,
-                              HttpServletRequest request) {
+    public NodeBACKUP getDataForDir(@RequestParam("id") Long directoryId,
+                                    HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
         directoryService.ensureDirectoryOwnership(directoryId, user.userId());
 
@@ -34,8 +34,8 @@ public class DirectoryRestController {
     }
 
     @GetMapping("/user")
-    public Node getAllDataForUser(@RequestParam("id") Long requestedUserId,
-                                  HttpServletRequest request) {
+    public NodeBACKUP getAllDataForUser(@RequestParam("id") Long requestedUserId,
+                                        HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
         if (!user.userId().equals(requestedUserId)) {
             throw new AccessDeniedException("You can only access your own data");

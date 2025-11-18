@@ -1,6 +1,6 @@
 package com.yana.filestorage.dto;
 
-public record UserInfo(
+public record UserInfoBACKUP(
         Long userId,
         String email,
         String role

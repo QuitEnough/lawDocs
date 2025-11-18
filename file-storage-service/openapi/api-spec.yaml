@@ -1,0 +1,468 @@
+openapi: 3.0.3
+info:
+  title: File Storage Service API
+  description: API for managing user files and directories with MinIO backend
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+    description: Local development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /files/upload:
+    post:
+      tags:
+        - Files
+      summary: Upload a new file
+      operationId: uploadFile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "document.pdf"
+                file:
+                  type: string
+                  format: binary
+                directory_id:
+                  type: integer
+                  nullable: true
+                  example: 3
+              required:
+                - name
+                - file
+      responses:
+        '200':
+          description: File uploaded successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: File with this name already exists in the directory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /files/find:
+    get:
+      tags:
+        - Files
+      summary: Download a file
+      operationId: findFile
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: fileId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: File stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/FileNotFound'
+
+  /files/delete:
+    delete:
+      tags:
+        - Files
+      summary: Delete a file
+      operationId: deleteFile
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: File deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/FileNotFound'
+
+  /files/rename:
+    put:
+      tags:
+        - Files
+      summary: Rename a file
+      operationId: renameFile
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: fileId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: newName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File renamed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/FileNotFound'
+        '409':
+          description: File with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /directories:
+    get:
+      tags:
+        - Directories
+      summary: Get contents of a directory
+      operationId: getDataForDir
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Directory structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DirectoryNotFound'
+
+  /directories/user:
+    get:
+      tags:
+        - Directories
+      summary: Get full file/directory tree for user
+      operationId: getAllDataForUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Full user file structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User can only access their own data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /directories/create:
+    post:
+      tags:
+        - Directories
+      summary: Create a new directory
+      operationId: createDirectory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: parentId
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+      responses:
+        '201':
+          description: Directory created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Directory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Directory with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /directories/rename:
+    put:
+      tags:
+        - Directories
+      summary: Rename a directory
+      operationId: renameDirectory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: directoryId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: newName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Directory renamed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DirectoryNotFound'
+        '409':
+          description: Directory with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /directories/delete:
+    delete:
+      tags:
+        - Directories
+      summary: Delete a directory
+      operationId: deleteDirectory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Directory deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DirectoryNotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Node:
+      type: object
+      properties:
+        dirs:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeDir'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeFile'
+
+    NodeDir:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "dir"
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Documents"
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 3
+        childrenDirs:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeDir'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeFile'
+
+    NodeFile:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "file"
+        id:
+          type: integer
+          format: int64
+          example: 5
+        name:
+          type: string
+          example: "report.pdf"
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+
+    UserInfo:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        role:
+          type: string
+          example: "USER"
+      required:
+        - userId
+        - email
+        - role
+
+    Directory:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        name:
+          type: string
+          example: "NewFolder"
+        userId:
+          type: integer
+          example: 1
+        parentId:
+          type: integer
+          nullable: true
+          example: 3
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 403
+        message:
+          type: string
+          example: "Access denied"
+      required:
+        - statusCode
+        - message
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    FileNotFound:
+      description: File not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    DirectoryNotFound:
+      description: Directory not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

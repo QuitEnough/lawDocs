@@ -40,7 +40,7 @@ public class MinioServiceImpl implements MinioService {
                             .object(uuid.toString())
                             .build());
         } catch (Exception e) {
-            throw new FileActionException("Unable to save file", e);
+            throw new FileActionException("Unable to save file");
         }
 
         return true;
@@ -55,7 +55,7 @@ public class MinioServiceImpl implements MinioService {
                             .object(uuid.toString())
                             .build());
         } catch (Exception e) {
-            throw new FileActionException("Unable to delete the file", e);
+            throw new FileActionException("Unable to delete the file");
         }
     }
 
@@ -69,7 +69,7 @@ public class MinioServiceImpl implements MinioService {
                             .build()
             );
         } catch (Exception e) {
-            throw new FileActionException("Unable to download", e);
+            throw new FileActionException("Unable to download");
         }
     }
 
