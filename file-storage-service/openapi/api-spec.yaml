@@ -352,7 +352,6 @@ components:
         parentId:
           type: integer
           format: int64
-          nullable: true
           example: 3
         childrenDirs:
           type: array

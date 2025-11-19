@@ -38,8 +38,8 @@ public class FileRestController {
                                            HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
 
-        log.info("[FileController] Uploading file '{}' for user {}", name, user.userId());
-        long fileId = fileService.save(name, directoryId, user.userId());
+        log.info("[FileController] Uploading file '{}' for user {}", name, user.getUserId());
+        long fileId = fileService.save(name, directoryId, user.getUserId());
         UUID uuid = fileService.find(fileId);
         minioService.save(uuid, file);
 
@@ -52,9 +52,9 @@ public class FileRestController {
                          HttpServletRequest request,
                          HttpServletResponse response) {
         var user = tokenExtractor.extractFromRequest(request);
-        fileService.ensureFileOwnership(fileId, user.userId());
+        fileService.ensureFileOwnership(fileId, user.getUserId());
 
-        log.info("[Request] Finding file {} for user {}", fileId, user.userId());
+        log.info("[Request] Finding file {} for user {}", fileId, user.getUserId());
         try (InputStream stream = fileService.download(fileId)) {
             response.setHeader("Content-Disposition", "attachment");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -68,9 +68,9 @@ public class FileRestController {
     public ResponseEntity<Void> deleteFile(@RequestParam("id") Long fileId,
                                            HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        fileService.ensureFileOwnership(fileId, user.userId());
+        fileService.ensureFileOwnership(fileId, user.getUserId());
 
-        log.info("[Request] Deleting file {} for user {}", fileId, user.userId());
+        log.info("[Request] Deleting file {} for user {}", fileId, user.getUserId());
         minioService.delete(fileService.find(fileId));
         fileService.delete(fileId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -81,9 +81,9 @@ public class FileRestController {
                                            @RequestParam String newName,
                                            HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        fileService.ensureFileOwnership(fileId, user.userId());
+        fileService.ensureFileOwnership(fileId, user.getUserId());
 
-        log.info("[Request] renaming file with id {} to '{} for user {}'", fileId, newName, user.userId());
+        log.info("[Request] renaming file with id {} to '{} for user {}'", fileId, newName, user.getUserId());
         fileService.renameFile(fileId, newName);
 
         log.info("[Response] file renamed successfully");

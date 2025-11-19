@@ -1,6 +1,6 @@
 package com.yana.filestorage.rest;
 
-import com.yana.filestorage.dto.NodeBACKUP;
+import com.yana.filestorage.api.dto.Node;
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.exception.AccessDeniedException;
 import com.yana.filestorage.service.DirectoryService;
@@ -24,20 +24,20 @@ public class DirectoryRestController {
     private final TokenExtractor tokenExtractor;
 
     @GetMapping
-    public NodeBACKUP getDataForDir(@RequestParam("id") Long directoryId,
-                                    HttpServletRequest request) {
+    public Node getDataForDir(@RequestParam("id") Long directoryId,
+                              HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        directoryService.ensureDirectoryOwnership(directoryId, user.userId());
+        directoryService.ensureDirectoryOwnership(directoryId, user.getUserId());
 
-        log.info("[Response] Data for directory {} for user {}", directoryId, user.userId());
+        log.info("[Response] Data for directory {} for user {}", directoryId, user.getUserId());
         return structureService.getDataForCertainDir(directoryId);
     }
 
     @GetMapping("/user")
-    public NodeBACKUP getAllDataForUser(@RequestParam("id") Long requestedUserId,
+    public Node getAllDataForUser(@RequestParam("id") Long requestedUserId,
                                         HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        if (!user.userId().equals(requestedUserId)) {
+        if (!user.getUserId().equals(requestedUserId)) {
             throw new AccessDeniedException("You can only access your own data");
         }
 
@@ -49,9 +49,9 @@ public class DirectoryRestController {
     public ResponseEntity<Void> deleteDirectory(@RequestParam("id") Long directoryId,
                                                 HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        directoryService.ensureDirectoryOwnership(directoryId, user.userId());
+        directoryService.ensureDirectoryOwnership(directoryId, user.getUserId());
 
-        log.info("[Request] Deleting directory {} for user {}", directoryId, user.userId());
+        log.info("[Request] Deleting directory {} for user {}", directoryId, user.getUserId());
         directoryService.deleteDirectory(directoryId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -62,8 +62,8 @@ public class DirectoryRestController {
                                                      HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
 
-        log.info("[Request] creating directory with name {} and parentId {} for user {}", name, parentId, user.userId());
-        Directory directory = directoryService.createDirectory(name, parentId, user.userId());
+        log.info("[Request] creating directory with name {} and parentId {} for user {}", name, parentId, user.getUserId());
+        Directory directory = directoryService.createDirectory(name, parentId, user.getUserId());
 
         log.info("[Response] created directory with id {}", directory.getId());
         return new ResponseEntity<>(directory, HttpStatus.CREATED);
@@ -74,9 +74,9 @@ public class DirectoryRestController {
                                                 @RequestParam String newName,
                                                 HttpServletRequest request) {
         var user = tokenExtractor.extractFromRequest(request);
-        directoryService.ensureDirectoryOwnership(directoryId, user.userId());
+        directoryService.ensureDirectoryOwnership(directoryId, user.getUserId());
 
-        log.info("[Request] renaming directory with id {} to '{}' for user {}", directoryId, newName, user.userId());
+        log.info("[Request] renaming directory with id {} to '{}' for user {}", directoryId, newName, user.getUserId());
         directoryService.renameDirectory(directoryId, newName);
 
         log.info("[Response] directory renamed successfully");
