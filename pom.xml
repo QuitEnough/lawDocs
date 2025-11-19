@@ -19,7 +19,7 @@
 
     <modules>
         <module>file-storage-service</module>
-        <module>user-service</module>
+        <module>identity-service</module>
     </modules>
 
     <properties>

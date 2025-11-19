@@ -1,10 +1,10 @@
 services:
 
-  user-service:
-    container_name: user-service
+  identity-service:
+    container_name: identity-service
     build:
       context: .
-      dockerfile: user-service/Dockerfile
+      dockerfile: identity-service/Dockerfile
     restart: no
     ports:
       - "8084:8084"
