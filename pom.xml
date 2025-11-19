@@ -40,6 +40,9 @@
         <jsonwebtoken.version>0.12.5</jsonwebtoken.version>
         <org.openapitools.version>0.2.6</org.openapitools.version>
         <io.swagger.core.version>2.2.21</io.swagger.core.version>
+        <io.micrometer.version>1.14.3</io.micrometer.version>
+        <micrometer-tracing.version>1.3.3</micrometer-tracing.version>
+        <opentelemetry.version>1.39.0</opentelemetry.version>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +103,33 @@
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>${minio.version}</version>
+            </dependency>
+
+            <!-- Observability -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${io.micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-otel</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-otlp</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-observation</artifactId>
+                <version>${io.micrometer.version}</version>
             </dependency>
 
             <!-- Mapstruct -->

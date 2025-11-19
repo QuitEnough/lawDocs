@@ -27,3 +27,22 @@ application:
       expiration: ${TOKEN_EXPIRATION}
       refresh-token:
         expiration: ${TOKEN_REFRESH_EXPIRATION}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: otlp

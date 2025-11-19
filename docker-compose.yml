@@ -1,53 +1,5 @@
 services:
 
-  identity-service:
-    container_name: identity-service
-    build:
-      context: .
-      dockerfile: identity-service/Dockerfile
-    restart: no
-    ports:
-      - "8084:8084"
-    environment:
-      HOST_DB: user-db
-      PORT_DB: 5432
-      NAME_DB: ${USER_DB_NAME}
-      USER_DB: ${USER_DB}
-      PASSWORD_DB: ${PASSWORD_DB}
-      TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
-    depends_on:
-      user-db:
-        condition: service_healthy
-
-  file-storage-service:
-    container_name: file-storage-service
-    build:
-      context: .
-      dockerfile: file-storage-service/Dockerfile
-    restart: no
-    ports:
-      - "8082:8082"
-    environment:
-      HOST_DB: file-db
-      PORT_DB: 5432
-      NAME_DB: ${FILE_DB_NAME}
-      USER_DB: ${USER_DB}
-      PASSWORD_DB: ${PASSWORD_DB}
-      TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
-      MINIO_URL: ${MINIO_URL}
-      MINIO_PORT: ${MINIO_PORT}
-      USER_SERVICE_URL: http://user-service:8084
-    depends_on:
-      file-db:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-
   user-db:
     image: postgres:16-alpine
     container_name: user-db
@@ -86,6 +38,28 @@ services:
       retries: 10
       start_period: 10s
 
+  user-db-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: user-db-exporter
+    depends_on:
+      user-db:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://${USER_DB}:${PASSWORD_DB}@user-db:5432/${USER_DB_NAME}?sslmode=disable
+    ports:
+      - "9187:9187"
+
+  file-db-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: file-db-exporter
+    depends_on:
+      file-db:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://${USER_DB}:${PASSWORD_DB}@file-db:5432/${FILE_DB_NAME}?sslmode=disable
+    ports:
+      - "9188:9187"
+
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -110,6 +84,144 @@ services:
       timeout: 20s
       retries: 3
 
+  identity-service:
+    container_name: identity-service
+    build:
+      context: .
+      dockerfile: identity-service/Dockerfile
+    restart: no
+    ports:
+      - "8084:8084"
+    environment:
+      HOST_DB: user-db
+      PORT_USER_DB: 5432
+      USER_DB_NAME: ${USER_DB_NAME}
+      USER_DB: ${USER_DB}
+      PASSWORD_DB: ${PASSWORD_DB}
+      TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
+      TOKEN_EXPIRATION: ${TOKEN_EXPIRATION}
+      TOKEN_REFRESH_EXPIRATION: ${TOKEN_REFRESH_EXPIRATION}
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: '*'
+      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: 'true'
+      OTLP_EXPORTER_ENDPOINT: http://alloy:4318
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+  file-storage-service:
+    container_name: file-storage-service
+    build:
+      context: .
+      dockerfile: file-storage-service/Dockerfile
+    restart: no
+    ports:
+      - "8082:8082"
+    environment:
+      HOST_DB: file-db
+      PORT_FILE_DB: 5432
+      FILE_DB_NAME: ${FILE_DB_NAME}
+      USER_DB: ${USER_DB}
+      PASSWORD_DB: ${PASSWORD_DB}
+      TOKEN_SIGNING_KEY: ${TOKEN_SIGNING_KEY}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      MINIO_URL: ${MINIO_URL}
+      MINIO_PORT: ${MINIO_PORT}
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: '*'
+      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: 'true'
+      OTLP_EXPORTER_ENDPOINT: http://alloy:4318
+    depends_on:
+      file-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:9090/-/healthy" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infrastructure/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_data:/loki
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3100/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./infrastructure/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "9080:9080"  # HTTP
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    volumes:
+      - ./infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+      alloy:
+        condition: service_started
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_METRICS_ENABLED: "true"
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:3000/api/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 networks:
   app_network:
     driver: bridge
@@ -118,3 +230,5 @@ volumes:
   user_data:
   file_data:
   minio-storage:
+  loki_data:
+  tempo_data:
