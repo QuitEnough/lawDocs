@@ -9,6 +9,7 @@ import io.minio.RemoveObjectArgs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -29,6 +30,7 @@ public class MinioServiceImpl implements MinioService {
         this.bucket = bucket;
     }
 
+    @Transactional
     @Override
     public boolean save(UUID uuid, MultipartFile multipartFile) {
         try {
@@ -46,6 +48,7 @@ public class MinioServiceImpl implements MinioService {
         return true;
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         try {

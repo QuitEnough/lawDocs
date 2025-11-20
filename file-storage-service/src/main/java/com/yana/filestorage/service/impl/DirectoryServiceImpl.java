@@ -30,6 +30,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directoryRepository.findDirectoriesByParentId(directoryId);
     }
 
+    @Transactional
     @Override
     public void deleteDirectory(Long directoryId) {
         directoryRepository.deleteById(directoryId);

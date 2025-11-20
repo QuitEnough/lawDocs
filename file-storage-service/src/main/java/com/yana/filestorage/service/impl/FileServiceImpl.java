@@ -26,6 +26,7 @@ public class FileServiceImpl implements FileService {
 
     private final MinioService minioService;
 
+    @Transactional
     @Override
     public Long save(String name, Long directoryId, Long userId) {
         UUID uuid = UUID.randomUUID();
@@ -44,6 +45,7 @@ public class FileServiceImpl implements FileService {
         return file.getId();
     }
 
+    @Transactional
     @Override
     public void delete(Long fileId) {
         Optional<File> file = fileRepository.findById(fileId);

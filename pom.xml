@@ -20,6 +20,7 @@
     <modules>
         <module>file-storage-service</module>
         <module>identity-service</module>
+        <module>api</module>
     </modules>
 
     <properties>
@@ -43,6 +44,11 @@
         <io.micrometer.version>1.14.3</io.micrometer.version>
         <micrometer-tracing.version>1.3.3</micrometer-tracing.version>
         <opentelemetry.version>1.39.0</opentelemetry.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-starter-openfeign.version>4.1.1</spring-cloud-starter-openfeign.version>
+        <feign-micrometer.version>13.6</feign-micrometer.version>
+        <springdoc-openapi-starter.version>2.5.0</springdoc-openapi-starter.version>
+        <openapi-generator-maven-plugin.version>7.7.0</openapi-generator-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -131,6 +137,11 @@
                 <artifactId>micrometer-observation</artifactId>
                 <version>${io.micrometer.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi-starter.version}</version>
+            </dependency>
 
             <!-- Mapstruct -->
             <dependency>
@@ -163,6 +174,19 @@
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${io.swagger.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${spring-cloud-starter-openfeign.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
