@@ -2,12 +2,14 @@ package com.yana.filestorage.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "directories")
+@Audited
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

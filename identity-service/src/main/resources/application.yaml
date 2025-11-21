@@ -15,6 +15,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+      org.hibernate.envers:
+        autoRegisterListeners: true
+        audit_table_suffix: _history
+        default_schema: user_history
+        store_data_at_delete: true
 
   flyway:
     enabled: true

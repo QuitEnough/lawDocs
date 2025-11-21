@@ -19,6 +19,13 @@ paths:
       operationId: uploadFile
       security:
         - BearerAuth: []
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       requestBody:
         required: true
         content:
@@ -34,6 +41,7 @@ paths:
                   format: binary
                 directory_id:
                   type: integer
+                  format: int64
                   nullable: true
                   example: 3
               required:
@@ -76,11 +84,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: fileId
           in: query
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: File stream
@@ -105,11 +120,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: id
           in: query
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: File deleted successfully
@@ -129,11 +151,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: fileId
           in: query
           required: true
           schema:
             type: integer
+            format: int64
         - name: newName
           in: query
           required: true
@@ -166,11 +195,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: id
           in: query
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Directory structure
@@ -194,11 +230,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: id
           in: query
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Full user file structure
@@ -224,6 +267,12 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: name
           in: query
           required: true
@@ -234,6 +283,7 @@ paths:
           required: false
           schema:
             type: integer
+            format: int64
             nullable: true
       responses:
         '201':
@@ -241,7 +291,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Directory'
+                $ref: '#/components/schemas/DirectoryResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -264,11 +314,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: directoryId
           in: query
           required: true
           schema:
             type: integer
+            format: int64
         - name: newName
           in: query
           required: true
@@ -301,11 +358,18 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         - name: id
           in: query
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Directory deleted
@@ -400,21 +464,23 @@ components:
         - email
         - role
 
-    Directory:
+    DirectoryResponse:
       type: object
       properties:
         id:
           type: integer
+          format: int64
           example: 10
         name:
           type: string
           example: "NewFolder"
         userId:
           type: integer
+          format: int64
           example: 1
         parentId:
           type: integer
-          nullable: true
+          format: int64
           example: 3
 
     ErrorResponse:

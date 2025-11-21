@@ -1,8 +1,8 @@
 package com.yana.identityservice.service;
 
-import com.yana.identity_service.api.dto.AuthenticationRequest;
-import com.yana.identity_service.api.dto.AuthenticationResponse;
-import com.yana.identity_service.api.dto.RegisterRequest;
+import com.yana.identityservice.api.dto.AuthenticationRequest;
+import com.yana.identityservice.api.dto.AuthenticationResponse;
+import com.yana.identityservice.api.dto.RegisterRequest;
 import com.yana.identityservice.entity.User;
 import com.yana.identityservice.exception.UserNotFoundException;
 import com.yana.identityservice.repository.UserRepository;

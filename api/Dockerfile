@@ -7,5 +7,5 @@ FROM eclipse-temurin:17-jre
 VOLUME /tmp
 WORKDIR /app
 COPY --from=build /build/api/target/api-0.1.jar app.jar
-EXPOSE 8080
+EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]

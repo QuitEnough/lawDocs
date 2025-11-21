@@ -1,6 +1,5 @@
-CREATE TABLE IF NOT EXISTS users
-(
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+CREATE TABLE user_schema.users (
+    id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     email VARCHAR(200) UNIQUE NOT NULL,
