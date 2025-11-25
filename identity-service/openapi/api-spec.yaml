@@ -3,11 +3,14 @@ info:
   title: User Service API
   description: API for user registration, authentication, and password management
   version: 1.0.0
+tags:
+  - name: Authentication
+    description: API endpoints for user registration, login, and password management
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8084
     description: Local development server
 paths:
-  /auth/register:
+  /register:
     post:
       tags:
         - Authentication
@@ -39,7 +42,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/authenticate:
+  /authenticate:
     post:
       tags:
         - Authentication
@@ -65,7 +68,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/change-password:
+  /change-password:
     patch:
       tags:
         - Authentication

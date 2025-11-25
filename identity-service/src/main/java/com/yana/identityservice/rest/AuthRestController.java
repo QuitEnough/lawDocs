@@ -1,6 +1,6 @@
 package com.yana.identityservice.rest;
 
-import com.yana.identityservice.api.client.AuthApi;
+import com.yana.identityservice.api.client.AuthenticationApi;
 import com.yana.identityservice.api.dto.AuthenticationRequest;
 import com.yana.identityservice.api.dto.AuthenticationResponse;
 import com.yana.identityservice.api.dto.RegisterRequest;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthRestController implements AuthApi {
+public class AuthRestController implements AuthenticationApi {
 
     private final AuthenticationService service;
 

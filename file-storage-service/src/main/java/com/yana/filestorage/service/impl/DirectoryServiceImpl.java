@@ -3,7 +3,7 @@ package com.yana.filestorage.service.impl;
 import com.yana.filestorage.entity.Directory;
 import com.yana.filestorage.exception.AccessDeniedException;
 import com.yana.filestorage.exception.DirectoryActionException;
-import com.yana.filestorage.exception.DirectoryAlreadyExists;
+import com.yana.filestorage.exception.DirectoryAlreadyExistsException;
 import com.yana.filestorage.exception.DirectoryNotFoundException;
 import com.yana.filestorage.repository.DirectoryRepository;
 import com.yana.filestorage.service.DirectoryService;
@@ -64,7 +64,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         boolean directoryExists = directoryRepository.existsByNameAndParentIdAndUserId(name, parentId, userId);
         if (directoryExists) {
-            throw new DirectoryAlreadyExists("Directory with this name already exists in the specified location");
+            throw new DirectoryAlreadyExistsException("Directory with this name already exists in the specified location");
         }
 
         Directory directory = Directory.builder()
@@ -95,7 +95,7 @@ public class DirectoryServiceImpl implements DirectoryService {
                 directory.getParentId(),
                 directory.getUserId());
         if (directoryExists) {
-            throw new DirectoryAlreadyExists("Directory with this name already exists in the same location");
+            throw new DirectoryAlreadyExistsException("Directory with this name already exists in the same location");
         }
 
         directory.setName(newName);

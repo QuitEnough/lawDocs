@@ -5,9 +5,9 @@ spring:
   application:
     name: IDENTITY-SERVICE
   datasource:
-    url: jdbc:postgresql://${HOST_DB}:${PORT_USER_DB}/${USER_DB_NAME}
-    username: ${USER_DB}
-    password: ${PASSWORD_DB}
+    url: "jdbc:postgresql://${HOST_DB}:${PORT_USER_DB}/${USER_DB_NAME}"
+    username: "${USER_DB}"
+    password: "${PASSWORD_DB}"
   jpa:
     hibernate:
       ddl-auto: validate
@@ -28,10 +28,10 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ${TOKEN_SIGNING_KEY}
-      expiration: ${TOKEN_EXPIRATION}
+      secret-key: "${TOKEN_SIGNING_KEY}"
+      expiration: "${TOKEN_EXPIRATION}"
       refresh-token:
-        expiration: ${TOKEN_REFRESH_EXPIRATION}
+        expiration: "${TOKEN_REFRESH_EXPIRATION}"
 
 management:
   endpoints:
@@ -46,7 +46,7 @@ management:
 otel:
   exporter:
     otlp:
-      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      endpoint: "${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}"
   traces:
     exporter: otlp
   metrics:

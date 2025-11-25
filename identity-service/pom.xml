@@ -129,6 +129,7 @@
                                 <interfaceOnly>true</interfaceOnly>
                                 <useJakartaEe>true</useJakartaEe>
                                 <useBeanValidation>true</useBeanValidation>
+                                <useTags>true</useTags>
                             </configOptions>
                             <validateSpec>false</validateSpec>
                         </configuration>
