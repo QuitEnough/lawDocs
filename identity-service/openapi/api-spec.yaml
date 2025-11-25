@@ -102,6 +102,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /delete-account:
+    delete:
+      tags:
+        - Authentication
+      summary: Delete current user account (by JWT)
+      operationId: deleteAccount
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '204':
+          description: Account deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -183,6 +201,9 @@ components:
         tokenType:
           type: string
           example: "Bearer"
+        userId:
+          type: integer
+          format: int64
 
     Role:
       type: string

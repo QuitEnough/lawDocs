@@ -1,14 +1,18 @@
 package com.yana.identityservice.service;
 
 import com.yana.identityservice.entity.User;
+import com.yana.identityservice.exception.UserNotAuthenticatedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -91,6 +95,34 @@ public class JwtService {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public Long extractUseridFromRequest() {
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request = attrs.getRequest();
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new UserNotAuthenticatedException("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+        return extractUserId(token);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> {
+            var id = claims.get("id");
+            if (id == null) {
+                throw new IllegalArgumentException("Token does not contain 'id' claim");
+            }
+            if (id instanceof Number) {
+                return ((Number) id).longValue();
+            }
+            try {
+                return Long.parseLong(id.toString());
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid 'id' claim in token: " + id, e);
+            }
+        });
     }
 
 }

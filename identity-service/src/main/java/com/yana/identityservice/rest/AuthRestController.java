@@ -5,6 +5,7 @@ import com.yana.identityservice.api.dto.AuthenticationRequest;
 import com.yana.identityservice.api.dto.AuthenticationResponse;
 import com.yana.identityservice.api.dto.RegisterRequest;
 import com.yana.identityservice.service.AuthenticationService;
+import com.yana.identityservice.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthRestController implements AuthenticationApi {
 
     private final AuthenticationService service;
+    private final JwtService jwtService;
 
     @Override
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest registerRequest) {
@@ -29,6 +31,14 @@ public class AuthRestController implements AuthenticationApi {
     public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest authenticationRequest) {
         log.info("Authentication request: {}", authenticationRequest);
         return ResponseEntity.ok(service.authenticate(authenticationRequest));
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteAccount() {
+        log.info("Deleting current account");
+        var userId = jwtService.extractUseridFromRequest();
+        service.deleteAccount(userId);
+        return ResponseEntity.noContent().build();
     }
 
 }

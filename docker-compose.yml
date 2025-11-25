@@ -159,6 +159,8 @@ services:
     ports:
       - "8085:8085"
     environment:
+      IDENTITY_SERVICE_URL: http://identity-service:8084
+      FILE_STORAGE_SERVICE_URL: http://file-storage-service:8082
       OTLP_EXPORTER_ENDPOINT: http://alloy:4318
     depends_on:
       identity-service:

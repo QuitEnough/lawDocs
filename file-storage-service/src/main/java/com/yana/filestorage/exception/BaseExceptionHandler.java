@@ -10,10 +10,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 @Slf4j
-public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
+public class BaseExceptionHandler { //extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DirectoryActionException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryActionException ex) {
+    public final ResponseEntity<ErrorResponse> handleDirectoryActionException(DirectoryActionException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -31,7 +31,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserNotAuthenticatedException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(UserNotAuthenticatedException ex) {
+    public final ResponseEntity<ErrorResponse> handleUserNotAuthenticatedException(UserNotAuthenticatedException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
@@ -40,7 +40,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(AccessDeniedException ex) {
+    public final ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.FORBIDDEN.value())
@@ -49,7 +49,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DirectoryNotFoundException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryNotFoundException ex) {
+    public final ResponseEntity<ErrorResponse> handleDirectoryNotFoundException(DirectoryNotFoundException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.NOT_FOUND.value())
@@ -58,7 +58,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(FileNotFoundException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(FileNotFoundException ex) {
+    public final ResponseEntity<ErrorResponse> handleFileNotFoundException(FileNotFoundException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.NOT_FOUND.value())
@@ -67,30 +67,12 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(FileAlreadyExistsException.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(FileAlreadyExistsException ex) {
+    public final ResponseEntity<ErrorResponse> handleFileAlreadyExistsException(FileAlreadyExistsException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse()
                 .statusCode(HttpStatus.CONFLICT.value())
                 .message(ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler(DirectoryAlreadyExists.class)
-    public final ResponseEntity<ErrorResponse> handleFileActionException(DirectoryAlreadyExists ex) {
-        log.error(ex.getMessage(), ex);
-        ErrorResponse errorResponse = new ErrorResponse()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .message(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler({Throwable.class})
-    public ResponseEntity<ErrorResponse> handleException(Throwable ex) {
-        log.error(ex.getMessage(), ex);
-        ErrorResponse errorResponse = new ErrorResponse()
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
 }

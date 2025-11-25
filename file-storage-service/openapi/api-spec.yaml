@@ -11,7 +11,7 @@ security:
   - BearerAuth: []
 
 paths:
-  /files/upload:
+  /upload-file:
     post:
       tags:
         - Files
@@ -75,7 +75,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /files/find:
+  /find-file:
     get:
       tags:
         - Files
@@ -111,7 +111,7 @@ paths:
         '404':
           $ref: '#/components/responses/FileNotFound'
 
-  /files/delete:
+  /delete-file:
     delete:
       tags:
         - Files
@@ -142,7 +142,7 @@ paths:
         '404':
           $ref: '#/components/responses/FileNotFound'
 
-  /files/rename:
+  /rename-file:
     put:
       tags:
         - Files
@@ -258,7 +258,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /directories/create:
+  /create-directory:
     post:
       tags:
         - Directories
@@ -305,7 +305,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /directories/rename:
+  /rename-directory:
     put:
       tags:
         - Directories
@@ -349,7 +349,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /directories/delete:
+  /delete-directory:
     delete:
       tags:
         - Directories

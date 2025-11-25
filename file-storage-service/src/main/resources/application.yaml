@@ -4,14 +4,25 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: "jdbc:postgresql://${HOST_DB}:${PORT_FILE_DB}/${FILE_DB_NAME}"
-    username: ${USER_DB}
-    password: ${PASSWORD_DB}
+    url: "jdbc:postgresql://${HOST_DB:localhost}:${PORT_FILE_DB:8890}/${FILE_DB_NAME:file_db}?currentSchema=file"
+    username: "${USER_DB:postgres}"
+    password: "${PASSWORD_DB:postgres}"
+#    url: "jdbc:postgresql://${HOST_DB}:${PORT_FILE_DB}/${FILE_DB_NAME}"
+#    username: "${USER_DB}"
+#    password: "${PASSWORD_DB}"
 
   flyway:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
+    schemas: file, file_history
+    default-schema: file
+    table: flyway_schema_history
+    create-schemas: true
+    locations: classpath:db/migration
+    # Принудительно указываем схему для таблицы истории
+    placeholders:
+      flyway.schema: file
 
   jpa:
     hibernate:
@@ -30,33 +41,42 @@ spring:
     name: FILE-STORAGE-SERVICE
 
   minio:
-    url: ${MINIO_URL}
-    bucket: ${MINIO_BUCKET_NAME}
-    access-key: ${MINIO_ACCESS_KEY}
-    secret-key: ${MINIO_SECRET_KEY}
-    port: ${MINIO_PORT}
+    url: "${MINIO_URL}"
+    bucket: "${MINIO_BUCKET_NAME}"
+    access-key: "${MINIO_ACCESS_KEY}"
+    secret-key: "${MINIO_SECRET_KEY}"
+    port: "${MINIO_PORT}"
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 logging:
   level:
     org.springframework:
-      web: DEBUG
+      web:
+        servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
       org.flywaydb: DEBUG
       org.springframework.boot.autoconfigure.flyway: DEBUG
       org.springframework.jdbc.core: DEBUG
 
 user:
   service:
-    url: ${USER_SERVICE_URL:http://user-service:8084}
+    url: "${USER_SERVICE_URL:http://user-service:8084}"
 
 token:
   signing:
-    key: ${TOKEN_SIGNING_KEY}
+    key: "${TOKEN_SIGNING_KEY}"
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
   metrics:
     export:
       prometheus:
@@ -65,7 +85,7 @@ management:
 otel:
   exporter:
     otlp:
-      endpoint: ${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}
+      endpoint: "${OTLP_EXPORTER_ENDPOINT:http://localhost:4318}"
   traces:
     exporter: otlp
   metrics:

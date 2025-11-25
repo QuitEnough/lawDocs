@@ -16,6 +16,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ExceptionHandler({BaseException.class})
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public final ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         log.error(ex.getMessage(), ex);
@@ -32,19 +40,19 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
     }
 
+    @ExceptionHandler(UserNotAuthenticatedException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(UserNotAuthenticatedException ex) {
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
+    }
+
     @ExceptionHandler(UsernameNotFoundException.class)
     public final ResponseEntity<ErrorResponse> handleUserNotFoundException(UsernameNotFoundException ex) {
         log.error(ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
-    }
-
-    @ExceptionHandler({BaseException.class})
-    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
-        log.error(ex.getMessage(), ex);
-
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatusCode()));
     }
 
