@@ -92,7 +92,9 @@ public class StructureService {
         }
 
         // 3. Рекурсивно строим NodeDir (можно и итеративно, но рекурсия чище для деревьев)
-        List<NodeDir> rootDirs = childrenByParent.get(null).stream()
+        List<NodeDir> rootDirs = Optional.ofNullable(childrenByParent.get(null))
+                .orElse(Collections.emptyList())
+                .stream()
                 .map(dir -> buildNodeDir(dir, dirById, childrenByParent, filesByDir))
                 .collect(Collectors.toList());
 

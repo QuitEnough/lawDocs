@@ -10,7 +10,7 @@ import org.hibernate.envers.Audited;
 import java.util.UUID;
 
 @Entity
-@Table(name = "files")
+@Table(name = "files", schema = "file")
 @Audited
 @Data
 @AllArgsConstructor

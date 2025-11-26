@@ -31,8 +31,11 @@ public class FileServiceImpl implements FileService {
     public Long save(String name, Long directoryId, Long userId) {
         UUID uuid = UUID.randomUUID();
 
-        Directory directory = directoryRepository.findById(directoryId)
-                .orElseThrow(() -> new DirectoryNotFoundException("Directory not found"));
+        Directory directory = null;
+        if (directoryId != null) {
+            directory = directoryRepository.findById(directoryId)
+                    .orElse(null);
+        }
 
         File file = File.builder()
                 .name(name)
@@ -114,9 +117,11 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
+        var directoryId = (file.getDirectory() != null) ? file.getDirectory().getId() : null;
+
         var fileExists = fileRepository.existsByNameAndDirectoryIdAndUserId(
                 newName,
-                file.getDirectory().getId(),
+                directoryId,
                 file.getUserId());
 
         if (fileExists) {

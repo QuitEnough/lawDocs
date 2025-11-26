@@ -1,32 +1,25 @@
 package com.yana.filestorage.rest;
 
 import com.yana.filestorage.api.client.FilesApi;
-import com.yana.filestorage.exception.FileActionException;
 import com.yana.filestorage.service.FileService;
 import com.yana.filestorage.service.MinioService;
 import com.yana.filestorage.service.TokenExtractor;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/files")
-@AllArgsConstructor
 @Slf4j
+@RestController
+@RequiredArgsConstructor
 public class FileRestController implements FilesApi {
 
     private final FileService fileService;
