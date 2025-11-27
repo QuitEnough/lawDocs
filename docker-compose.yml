@@ -18,6 +18,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    networks:
+      - app_network
 
   file-db:
     image: postgres:16-alpine
@@ -37,6 +39,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    networks:
+      - app_network
 
   user-db-exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -74,7 +78,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
-      MINIO_URL: ${MINIO_URL}
+      MINIO_URL: minio
       MINIO_PORT: ${MINIO_PORT}
     volumes:
       - minio-storage:/data
@@ -83,6 +87,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - app_network
 
   identity-service:
     container_name: identity-service
@@ -113,6 +119,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - app_network
 
   file-storage-service:
     container_name: file-storage-service
@@ -134,7 +142,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
-      MINIO_URL: ${MINIO_URL}
+      MINIO_URL: minio
       MINIO_PORT: ${MINIO_PORT}
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: '*'
       MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: 'true'
@@ -150,6 +158,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - app_network
 
   api:
     container_name: api
@@ -174,6 +184,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - app_network
 
   prometheus:
     image: prom/prometheus:latest

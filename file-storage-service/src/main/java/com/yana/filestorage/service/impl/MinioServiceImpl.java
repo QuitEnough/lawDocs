@@ -42,7 +42,7 @@ public class MinioServiceImpl implements MinioService {
                             .object(uuid.toString())
                             .build());
         } catch (Exception e) {
-            throw new FileActionException("Unable to save file");
+            throw new FileActionException("Unable to save file", e);
         }
 
         return true;
