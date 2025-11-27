@@ -30,6 +30,7 @@ up:
 
 build-artifacts:
 	$(DOCKER_COMPOSE) build api --no-cache
+	$(DOCKER_COMPOSE) build file-storage-service --no-cache
 
 start:
 	$(DOCKER_COMPOSE) up -d
