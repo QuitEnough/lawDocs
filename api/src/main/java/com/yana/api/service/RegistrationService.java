@@ -1,16 +1,11 @@
 package com.yana.api.service;
 
 import com.yana.api.exception.RegistrationFailedException;
-import com.yana.api.feign.FileStorageServiceFeign;
-import com.yana.api.feign.IdentityServiceFeign;
 import com.yana.lawdocs.api.identity.dto.AuthenticationResponse;
 import com.yana.lawdocs.api.identity.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
