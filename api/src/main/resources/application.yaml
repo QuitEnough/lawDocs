@@ -9,6 +9,8 @@ spring:
       client:
         config:
           default:
+            connectTimeout: 5000
+            readTimeout: 30000
             logger-level: basic
 
 identity-service:

@@ -22,4 +22,8 @@ public interface IdentityServiceFeign {
     @DeleteMapping("/delete-account")
     ResponseEntity<Void> deleteAccount(@RequestHeader("Authorization") String authHeader);
 
+    // TODO: Добавить когда будет реализовано в Identity Service
+    // @PostMapping("/validate-token")
+    // ResponseEntity<Void> validateToken(@RequestHeader("Authorization") String authHeader);
+
 }

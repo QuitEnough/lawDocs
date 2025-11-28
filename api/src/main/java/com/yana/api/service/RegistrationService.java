@@ -7,33 +7,43 @@ import com.yana.lawdocs.api.identity.dto.AuthenticationResponse;
 import com.yana.lawdocs.api.identity.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RegistrationService {
 
-    private final IdentityServiceFeign identityFeign;
-    private final FileStorageServiceFeign fileStorageFeign;
+    private final AuthenticationService authenticationService;
+    private final FileStorageService fileStorageService;
+    private final CompensationService compensationService;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var authResponse = identityFeign.register(request);
+        log.info("Starting registration process for user: {}", request.getEmail());
+
+        AuthenticationResponse authResponse;
+        try {
+            authResponse = authenticationService.registerUser(request);
+            log.info("User registered successfully in Identity Service, userId: {}", authResponse.getUserId());
+        } catch (Exception e) {
+            log.error("Failed to register user in Identity Service: {}", request.getEmail(), e);
+            throw new RegistrationFailedException("User registration failed in Identity Service");
+        }
+
         var authHeader = "Bearer " + authResponse.getToken();
         var userId = authResponse.getUserId();
 
         try {
-            fileStorageFeign.createDirectory(authHeader, "root directory", null);
-            log.info("User {} registered and root directory created", userId);
+            log.info("Creating root directory for user: {}", userId);
+            fileStorageService.createDirectory(authHeader, "root directory", null);
+            log.info("Root directory created successfully for user: {}", userId);
             return authResponse;
         } catch (Exception e) {
-            log.warn("File storage failed for user {}. Compensating...", userId, e);
-            try {
-                identityFeign.deleteAccount(authHeader);
-                log.info("Compensation succeeded: account {} deleted", userId);
-            } catch (Exception rollbackEx) {
-                log.error("CRITICAL: failed to rollback user registration for id {}", userId, rollbackEx);
-            }
+            log.error("Failed to create root directory for user: {}. Starting compensation... ", userId, e);
+            compensationService.compensateUserRegistration(authHeader, userId);
             throw new RegistrationFailedException("Registration failed at file storage step");
         }
     }
