@@ -21,6 +21,7 @@
         <module>file-storage-service</module>
         <module>identity-service</module>
         <module>api</module>
+        <module>ai</module>
     </modules>
 
     <properties>
@@ -50,6 +51,7 @@
         <feign-micrometer.version>13.6</feign-micrometer.version>
         <springdoc-openapi-starter.version>2.5.0</springdoc-openapi-starter.version>
         <openapi-generator-maven-plugin.version>7.7.0</openapi-generator-maven-plugin.version>
+        <spring-ai.version>1.0.0-M6</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -66,6 +68,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Security -->
