@@ -1,6 +1,7 @@
 package com.yana.ai;
 
 import com.yana.ai.repository.ChatRepository;
+import com.yana.ai.services.PostgresChatMemory;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -32,7 +33,7 @@ public class AiApplication {
     }
 
     private ChatMemory getChatMemory() {
-        return MessageWindowChatMemory.builder()
+        return PostgresChatMemory.builder()
                 .maxMessages(2)
                 .chatMemoryRepository(chatRepository)
                 .build();
