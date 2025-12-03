@@ -2,18 +2,15 @@ package com.yana.ai;
 
 import com.yana.ai.repository.ChatRepository;
 import com.yana.ai.services.PostgresChatMemory;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.ai.chat.client.ChatClient;
-
-import java.util.List;
 
 @SpringBootApplication
 public class AiApplication {
