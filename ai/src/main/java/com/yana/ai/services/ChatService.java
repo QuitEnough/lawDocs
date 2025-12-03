@@ -2,10 +2,12 @@ package com.yana.ai.services;
 
 import com.yana.ai.model.Chat;
 import com.yana.ai.model.ChatEntry;
+import com.yana.ai.model.PostgresChatMemory;
 import com.yana.ai.model.Role;
 import com.yana.ai.repository.ChatRepository;
 import lombok.SneakyThrows;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -29,6 +31,9 @@ public class ChatService {
 
     @Autowired
     private ChatService myProxy;
+
+    @Autowired
+    private PostgresChatMemory postgresChatMemory;
 
     public List<Chat> getAllChats() {
         return chatRepository.findAll(
@@ -66,24 +71,28 @@ public class ChatService {
     @Transactional
     public void addChatEntry(Long chatId, String prompt, Role role) {
         var chat = chatRepository.findById(chatId).orElseThrow();
-        chat.addEntry(ChatEntry.builder()
+        chat.addChatEntry(ChatEntry.builder()
                 .content(prompt)
                 .role(role)
                 .build());
     }
 
     public SseEmitter proceedInteractionWithStreaming(Long chatId, String prompt) {
-        myProxy.addChatEntry(chatId, prompt, USER);
-
-        var answer = new StringBuilder();
 
         var sseEmitter = new SseEmitter(0L);
+        final var answer = new StringBuilder();
 
-        chatClient.prompt().user(prompt).stream()
+        chatClient.prompt(prompt)
+                .advisors(
+                        MessageChatMemoryAdvisor
+                                .builder(postgresChatMemory)
+                                .conversationId(String.valueOf(chatId))
+                                .build()
+                )
+                .stream()
                 .chatResponse()
                 .subscribe(response -> processToken(response, sseEmitter, answer),
-                        sseEmitter::completeWithError,
-                        () -> myProxy.addChatEntry(chatId, answer.toString(), ASSISTANT));
+                        sseEmitter::completeWithError);
 
         return sseEmitter;
     }
