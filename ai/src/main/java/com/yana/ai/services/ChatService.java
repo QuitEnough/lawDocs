@@ -2,12 +2,11 @@ package com.yana.ai.services;
 
 import com.yana.ai.model.Chat;
 import com.yana.ai.model.ChatEntry;
-import com.yana.ai.model.PostgresChatMemory;
 import com.yana.ai.model.Role;
 import com.yana.ai.repository.ChatRepository;
 import lombok.SneakyThrows;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -31,9 +30,6 @@ public class ChatService {
 
     @Autowired
     private ChatService myProxy;
-
-    @Autowired
-    private PostgresChatMemory postgresChatMemory;
 
     public List<Chat> getAllChats() {
         return chatRepository.findAll(
@@ -83,12 +79,7 @@ public class ChatService {
         final var answer = new StringBuilder();
 
         chatClient.prompt(prompt)
-                .advisors(
-                        MessageChatMemoryAdvisor
-                                .builder(postgresChatMemory)
-                                .conversationId(String.valueOf(chatId))
-                                .build()
-                )
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
                 .chatResponse()
                 .subscribe(response -> processToken(response, sseEmitter, answer),
