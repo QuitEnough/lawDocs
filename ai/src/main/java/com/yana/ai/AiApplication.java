@@ -4,10 +4,12 @@ import com.yana.ai.repository.ChatRepository;
 import com.yana.ai.services.PostgresChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -36,7 +38,11 @@ public class AiApplication {
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
         return builder
-                .defaultAdvisors(getHistoryAdvisor(), getRagAdvisor())
+                .defaultAdvisors(
+                        getHistoryAdvisor(),
+                        SimpleLoggerAdvisor.builder().build()/*,
+                        getRagAdvisor()*/
+                )
                 .build();
     }
 
@@ -46,7 +52,7 @@ public class AiApplication {
 
     private ChatMemory getChatMemory() {
         return PostgresChatMemory.builder()
-                .maxMessages(2)
+                .maxMessages(8)
                 .chatMemoryRepository(chatRepository)
                 .build();
     }
@@ -54,6 +60,11 @@ public class AiApplication {
     private Advisor getRagAdvisor() {
         return QuestionAnswerAdvisor.builder(vectorStore)
                 .promptTemplate(MY_PROMPT_TEMPLATE)
+                .searchRequest(
+                        SearchRequest.builder()
+                                .topK(5)
+                                .build()
+                )
                 .build();
 
     }
