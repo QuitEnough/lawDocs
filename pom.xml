@@ -52,6 +52,8 @@
         <springdoc-openapi-starter.version>2.5.0</springdoc-openapi-starter.version>
         <openapi-generator-maven-plugin.version>7.7.0</openapi-generator-maven-plugin.version>
         <spring-ai.version>1.0.0</spring-ai.version>
+        <pemistahl.version>1.2.2</pemistahl.version>
+        <lucene.version>10.2.2</lucene.version>
     </properties>
 
     <dependencyManagement>
@@ -209,6 +211,17 @@
                 <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-micrometer</artifactId>
                 <version>${feign-micrometer.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.pemistahl</groupId>
+                <artifactId>lingua</artifactId>
+                <version>${pemistahl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-analysis-common</artifactId>
+                <version>${lucene.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
