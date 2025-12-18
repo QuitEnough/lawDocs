@@ -3,8 +3,8 @@ server:
 
 telegram:
   bot:
-    token: ${TELEGRAM_BOT_TOKEN}
-    username: ${TELEGRAM_BOT_USERNAME}
+    token: "${TELEGRAM_BOT_TOKEN}"
+    username: "${TELEGRAM_BOT_USERNAME}"
 
   # Опциональные настройки HTTP клиента
   http:
