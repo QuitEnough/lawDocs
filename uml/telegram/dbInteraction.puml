@@ -1,0 +1,29 @@
+@startuml Database Interactions
+title Взаимодействие с БД
+
+participant "AI Service" as AI
+participant "File Storage" as FS
+database "PGVector\n(in AI Service DB)" as VEC
+database "MinIO" as MINIO
+database "File Metadata DB" as FDB
+
+autonumber
+
+FS -> MINIO : PUT /files/{userId}/{docId}
+MINIO --> FS : URL
+FS -> FDB : INSERT documents\n(user_id, filename, url, hash)
+
+AI -> FDB : SELECT url FROM documents\nWHERE user_id=? AND id=?
+FDB --> AI : storage_url
+
+AI -> MINIO : GET {storage_url}
+MINIO --> AI : File content
+
+AI -> AI : Process file → chunks → embeddings
+AI -> VEC : INSERT INTO document_chunks\n(user_id, document_id, embedding, text)
+VEC --> AI : OK
+
+AI -> FDB : UPDATE documents SET indexed=true\nWHERE id=?
+FDB --> AI : OK
+
+@enduml

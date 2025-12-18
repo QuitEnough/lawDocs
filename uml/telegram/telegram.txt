@@ -1,0 +1,30 @@
+Telegram Bot Service зависимости:
+  Обязательные:
+    - API Gateway (HTTP/REST)
+    - Telegram Bot API (через библиотеку)
+
+  Необязательные для MVP:
+    - Redis (для сессий, можно позже)
+    - Kafka (для асинхронных уведомлений)
+
+  НЕ нужны напрямую:
+    - Identity Service ❌
+    - Orchestrator ❌
+    - Domain Services ❌
+
+
+
+Список сервисов (исправленный):
+✅ Telegram Bot Service - интерфейс
+✅ API Gateway - фасад, аутентификация, роутинг
+✅ Orchestrator Service - координация процессов генерации
+✅ AI Service = LLM + RAG + вектора
+✅ Template Service - управление шаблонами
+✅ File Storage Service - MinIO + метаданные
+✅ Identity Service - аутентификация/авторизация
+
+Функциональность телеграм-бота:
+📥 "Добавить документ" → File Storage Service (MinIO + вектора)
+🤖 "Проконсультироваться с AI" → AI Service (чат по документам)
+📄 "Сгенерировать документ" → Orchestrator → Template + AI Services
+

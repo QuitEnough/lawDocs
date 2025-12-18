@@ -22,6 +22,7 @@
         <module>identity-service</module>
         <module>api</module>
         <module>ai</module>
+        <module>telegram-bot-service</module>
     </modules>
 
     <properties>
@@ -54,6 +55,7 @@
         <spring-ai.version>1.0.0</spring-ai.version>
         <pemistahl.version>1.2.2</pemistahl.version>
         <lucene.version>10.2.2</lucene.version>
+        <telegram.version>9.2.0</telegram.version>
     </properties>
 
     <dependencyManagement>
@@ -223,7 +225,19 @@
                 <artifactId>lucene-analysis-common</artifactId>
                 <version>${lucene.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+                <version>${telegram.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-client</artifactId>
+                <version>${telegram.version}</version>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <dependencies>

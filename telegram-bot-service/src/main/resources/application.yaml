@@ -1,0 +1,31 @@
+server:
+  port: 8086
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}
+
+  # Опциональные настройки HTTP клиента
+  http:
+    timeout:
+      seconds: 30
+    proxy:
+      enabled: false
+      host: ""
+      port: 50505
+
+spring:
+  application:
+    name: telegram-bot-service
+
+  main:
+    banner-mode: off
+
+logging:
+  level:
+    com.yana.lawDocs: DEBUG
+    org.telegram.telegrambots: INFO
+    org.springframework: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
