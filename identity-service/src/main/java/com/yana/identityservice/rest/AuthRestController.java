@@ -1,11 +1,10 @@
 package com.yana.identityservice.rest;
 
 import com.yana.identityservice.api.client.AuthenticationApi;
-import com.yana.identityservice.api.dto.AuthenticationRequest;
-import com.yana.identityservice.api.dto.AuthenticationResponse;
-import com.yana.identityservice.api.dto.RegisterRequest;
+import com.yana.identityservice.api.dto.*;
 import com.yana.identityservice.service.AuthenticationService;
 import com.yana.identityservice.service.JwtService;
+import com.yana.identityservice.service.TelegramAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthRestController implements AuthenticationApi {
 
     private final AuthenticationService service;
+    private final TelegramAuthService telegramAuthService;
     private final JwtService jwtService;
 
     @Override
@@ -39,6 +39,12 @@ public class AuthRestController implements AuthenticationApi {
         var userId = jwtService.extractUseridFromRequest();
         service.deleteAccount(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<TelegramAuthResponse> authenticateTelegram(TelegramAuthRequest telegramAuthRequest) {
+        log.info("Authentication telegram request: {}", telegramAuthRequest);
+        return ResponseEntity.ok(telegramAuthService.authenticate(telegramAuthRequest));
     }
 
 }

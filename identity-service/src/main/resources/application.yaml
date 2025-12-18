@@ -33,6 +33,10 @@ application:
       refresh-token:
         expiration: "${TOKEN_REFRESH_EXPIRATION}"
 
+telegram:
+  bot:
+    token: "${TELEGRAM_BOT_TOKEN}"
+
 management:
   endpoints:
     web:
@@ -42,7 +46,6 @@ management:
     export:
       prometheus:
         enabled: true
-
 otel:
   exporter:
     otlp:
@@ -51,3 +54,4 @@ otel:
     exporter: otlp
   metrics:
     exporter: otlp
+

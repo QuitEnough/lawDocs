@@ -76,6 +76,29 @@
 				<artifactId>openapi-generator-maven-plugin</artifactId>
 				<version>${openapi-generator-maven-plugin.version}</version>
 				<executions>
+					<!-- API Gateway спецификация -->
+					<execution>
+						<id>generate-api-gateway</id>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+							<inputSpec>${project.basedir}/openapi/api-spec.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<library>spring-cloud</library>
+							<output>${project.build.directory}/generated-sources/api-gateway</output>
+							<configOptions>
+								<apiPackage>com.yana.lawdocs.api.gateway</apiPackage>
+								<modelPackage>com.yana.lawdocs.api.gateway.dto</modelPackage>
+								<useLombok>true</useLombok>
+								<interfaceOnly>true</interfaceOnly>
+								<useJakartaEe>true</useJakartaEe>
+								<useBeanValidation>true</useBeanValidation>
+								<skipDefaultInterface>true</skipDefaultInterface>
+								<openApiNullable>false</openApiNullable>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+						</configuration>
+					</execution>
+
 					<!-- identity-service -->
 					<execution>
 						<id>generate-identity-client</id>
@@ -133,6 +156,7 @@
 						<goals><goal>add-source</goal></goals>
 						<configuration>
 							<sources>
+								<source>${project.build.directory}/generated-sources/api-gateway/src/main/java</source>
 								<source>${project.build.directory}/generated-sources/identity/src/main/java</source>
 								<source>${project.build.directory}/generated-sources/filestorage/src/main/java</source>
 							</sources>

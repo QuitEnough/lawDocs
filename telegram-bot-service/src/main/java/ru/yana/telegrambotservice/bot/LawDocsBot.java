@@ -28,6 +28,7 @@ import java.util.List;
 public class LawDocsBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
     private TelegramClient telegramClient;
+    private final WebAppHandler webAppHandler;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -38,6 +39,10 @@ public class LawDocsBot implements SpringLongPollingBot, LongPollingSingleThread
     private static final String ADD_DOCUMENT_BUTTON = "\uD83D\uDCE5 Добавить документ";
     private static final String CONSULT_AI_BUTTON = "\uD83E\uDD16 Проконсультироваться с AI";
     private static final String GENERATE_DOCUMENT_BUTTON = "\uD83D\uDCC4 Сгенерировать документ";
+
+    public LawDocsBot(WebAppHandler webAppHandler) {
+        this.webAppHandler = webAppHandler;
+    }
 
     @PostConstruct
     public void init() {
@@ -59,31 +64,42 @@ public class LawDocsBot implements SpringLongPollingBot, LongPollingSingleThread
 
     @Override
     public void consume(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            var messageText = update.getMessage().getText();
-            var chatId = update.getMessage().getChatId();
+        if (update.hasMessage()) {
 
-            switch (messageText) {
-                case "/start":
-                    startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/help":
-                    sendHelpMessage(chatId);
-                    break;
-                case "/settings":
-                    sendSettingsMessage(chatId);
-                    break;
-                case ADD_DOCUMENT_BUTTON:
-                    processAddDocument(chatId);
-                    break;
-                case CONSULT_AI_BUTTON:
-                    processConsultAI(chatId);
-                    break;
-                case GENERATE_DOCUMENT_BUTTON:
-                    processGenerateDocument(chatId);
-                    break;
-                default:
-                    sendDefaultMessage(chatId);
+            if (update.hasMessage()) {
+                if (update.getMessage().hasWebAppData()) {
+                    webAppHandler.handleWebAppData(update);
+                    return;
+                }
+            }
+
+            if (update.getMessage().hasText()) {
+                var messageText = update.getMessage().getText();
+                var chatId = update.getMessage().getChatId();
+
+                switch (messageText) {
+                    case "/start":
+                        startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+                        break;
+                    case "/help":
+                        sendHelpMessage(chatId);
+                        break;
+                    case "/settings":
+                        sendSettingsMessage(chatId);
+                        break;
+                    case ADD_DOCUMENT_BUTTON:
+                        processAddDocument(chatId);
+                        break;
+                    case CONSULT_AI_BUTTON:
+                        processConsultAI(chatId);
+                        break;
+                    case GENERATE_DOCUMENT_BUTTON:
+                        processGenerateDocument(chatId);
+                        break;
+                    default:
+                        sendDefaultMessage(chatId);
+            }
+
             }
         }
     }

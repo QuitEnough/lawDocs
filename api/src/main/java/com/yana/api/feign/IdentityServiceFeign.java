@@ -1,5 +1,7 @@
 package com.yana.api.feign;
 
+import com.yana.lawdocs.api.gateway.dto.TelegramAuthRequest;
+import com.yana.lawdocs.api.gateway.dto.TelegramAuthResponse;
 import com.yana.lawdocs.api.identity.dto.AuthenticationRequest;
 import com.yana.lawdocs.api.identity.dto.AuthenticationResponse;
 import com.yana.lawdocs.api.identity.dto.RegisterRequest;
@@ -25,5 +27,8 @@ public interface IdentityServiceFeign {
     // TODO: Добавить когда будет реализовано в Identity Service
     // @PostMapping("/validate-token")
     // ResponseEntity<Void> validateToken(@RequestHeader("Authorization") String authHeader);
+
+    @PostMapping("/telegram")
+    TelegramAuthResponse authenticateTelegram(@RequestBody TelegramAuthRequest request);
 
 }

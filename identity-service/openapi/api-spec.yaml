@@ -120,6 +120,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /telegram:
+    post:
+      tags: [ Authentication ]
+      summary: Authenticate via Telegram WebApp
+      description: Validates Telegram initData and returns JWT tokens
+      operationId: authenticateTelegram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramAuthRequest'
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramAuthResponse'
+        '401':
+          description: Invalid Telegram data
+        '422':
+          description: Validation error
+
 components:
   securitySchemes:
     BearerAuth:
@@ -224,3 +248,46 @@ components:
       required:
         - statusCode
         - message
+
+    TelegramAuthRequest:
+      type: object
+      required: [ initData ]
+      properties:
+        initData:
+          type: string
+          description: |
+            Telegram WebApp initialization data.
+            Format: `query_id=...&user=...&auth_date=...&hash=...`
+          example: "query_id=AAHdF6IQAAAAAN0XohDhrOrc&user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1653000000&hash=abc123def456...789"
+      description: Request for Telegram WebApp authentication
+
+    TelegramAuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token for API calls
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: JWT refresh token for obtaining new access tokens
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        tokenType:
+          type: string
+          description: Type of the token (always "Bearer")
+          example: "Bearer"
+          default: "Bearer"
+        userId:
+          type: integer
+          format: int64
+          description: Internal user ID in LawDocs system
+          example: 123
+        telegramId:
+          type: string
+          description: Telegram user ID
+          example: "123456789"
+        expiresIn:
+          type: integer
+          description: Access token expiration time in seconds
+          example: 3600
+      description: Response for successful Telegram authentication
