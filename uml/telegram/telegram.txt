@@ -14,7 +14,7 @@ Telegram Bot Service зависимости:
 
 
 
-Список сервисов (исправленный):
+Список сервисов:
 ✅ Telegram Bot Service - интерфейс
 ✅ API Gateway - фасад, аутентификация, роутинг
 ✅ Orchestrator Service - координация процессов генерации

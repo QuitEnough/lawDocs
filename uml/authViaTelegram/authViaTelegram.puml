@@ -1,0 +1,69 @@
+@startuml
+title Аутентификация через Telegram
+
+box "Клиент"
+  participant Telegram as "Telegram WebApp"
+end box
+
+box "Backend Services"
+  participant TBS as "Telegram Bot Service"
+  participant API as "API Gateway"
+  participant ID as "Identity Service"
+  database DB as "Database (Users)"
+end box
+
+Note over Telegram,DB: **Основной поток: Успешная аутентификация**
+
+Telegram ->> TBS: 1. POST / (с initData в WebApp)
+activate TBS
+
+TBS ->> API: 2. POST /api/v1/auth/telegram\n{ "initData": "query_id=...&user=...&hash=..." }
+activate API
+
+API ->> ID: 3. POST /auth/telegram\n(проксирует initData)
+activate ID
+
+ID -> ID: 4. Валидация hash в initData\nс помощью BOT_TOKEN
+
+alt Валидация не пройдена
+    ID -->> API: 401 Unauthorized
+    deactivate ID
+    API -->> TBS: 401 Unauthorized
+    deactivate API
+    TBS -->> Telegram: Ошибка аутентификации
+    deactivate TBS
+    return
+end
+
+ID -> ID: 5. Извлечение telegram_id из initData
+ID ->> DB: 6. Запрос: Найти пользователя по telegram_id
+activate DB
+
+alt Пользователь найден
+    DB -->> ID: Существующий User
+else Пользователь не найден
+    DB -->> ID: Пользователь не найден
+    ID -> ID: 7. Создать нового пользователя\nна основе данных из initData
+    ID ->> DB: Сохранить нового User
+    DB -->> ID: Новый User создан
+end
+deactivate DB
+
+ID -> ID: 8. Генерация пары JWT\n(access_token, refresh_token)
+ID ->> DB: 9. Сохранить хэш refresh_token
+activate DB
+DB -->> ID: OK
+deactivate DB
+
+ID -->> API: 10. 200 OK { access_token, refresh_token, user_id }
+deactivate ID
+
+API -->> TBS: 11. 200 OK { access_token, refresh_token, user_id }
+deactivate API
+
+TBS ->> Telegram: 12. Устанавливает токены в httpOnly куки\nИЛИ возвращает в теле ответа
+deactivate TBS
+
+Note over Telegram,DB: **Пользователь аутентифицирован.**\nПоследующие запросы идут с заголовком\nAuthorization: Bearer <access_token>
+
+@enduml

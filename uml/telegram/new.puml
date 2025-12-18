@@ -1,40 +1,19 @@
 @startuml Consultation with User Check
 title Консультация с AI + проверка принадлежности файлов
 
-actor User as U
-participant "Telegram Bot" as B
-participant "API Gateway" as API
-participant "Identity Service" as ID
-participant "AI Service" as AI
-database "PGVector" as VEC
+participant "Telegram" as Telegram
+participant "Telegram Bot" as Bot
+participant "Backend" as back
+participant "Database" as db
 
 autonumber
 
-U -> B : "Какие условия оплаты?"
-activate B
-
-B -> API : POST /api/ai/chat\nHeaders:\nX-Auth-Token: eyJ...\nX-Chat-Id: 123456789
-activate API
-
-API -> ID : gRPC: validateTokenAndChatId(token, chatId)
-ID --> API : UserInfo(userId="user_123")
-
-API -> AI : gRPC: ProcessQueryRequest(\n  userId="user_123",\n  query="Какие условия оплаты?",\n  mode="RAG_CHAT"\n)
-activate AI
-
-AI -> VEC : SELECT chunk_text\nFROM document_chunks\nWHERE embedding <-> ? < 0.3\nAND user_id = 'user_123'  ← ВАЖНО: фильтр по user_id
-activate VEC
-VEC --> AI : [Только фрагменты пользователя user_123]
-deactivate VEC
-
-AI -> AI : Генерация ответа на основе ТОЛЬКО своих документов
-AI --> API : ProcessQueryResponse(answer, sources)
-deactivate AI
-
-API --> B : HTTP 200
-deactivate API
-
-B -> U : Ответ с цитатами из ЕГО документов
-deactivate B
+Telegram -> Bot: Передача initData
+Bot -> back: Передача initData
+back -> back: Валидация initData с помощью bot_token и извлечение telegram id пользователя
+back -> db: Запрос пользователя из БД или создание новго
+db -> back: Получение пользователя из БД
+back -> back: Генерация пары JWT-токенов
+back -> Bot:  Установка пары токенов в cookies, ответ 200
 
 @enduml
