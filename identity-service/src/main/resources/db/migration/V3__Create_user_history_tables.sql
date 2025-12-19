@@ -9,6 +9,7 @@ CREATE TABLE user_history.users_history (
     revtype SMALLINT NOT NULL,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
+    telegram_id VARCHAR(255),
     email VARCHAR(200),
     password VARCHAR(200),
     create_date TIMESTAMP(6),

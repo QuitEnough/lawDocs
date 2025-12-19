@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>telegram-bot-service</artifactId>
+    <version>0.1</version>
     <name>Telegram Bot Service</name>
     <description>Telegram bot interface for LawDocs</description>
 
@@ -67,7 +68,7 @@
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
+<!--                            <version>${lombok.version}</version>-->
                         </exclude>
                     </excludes>
                 </configuration>
